@@ -8,7 +8,7 @@
   --maxw:1100px;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
+html,body{margin:0;padding:0;overflow-x:hidden;max-width:100%}
 body{
   font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans Arabic",Tahoma,sans-serif;
   background:var(--bg); color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased;
@@ -158,15 +158,15 @@ img{max-width:100%}
 .lane .slot{width:42px;height:42px;border-radius:10px;background:var(--emerald-50);display:grid;place-items:center;font-weight:800;color:var(--emerald-600)}
 
 /* Accessibility */
-.skip-link{position:absolute;left:-999px;top:0;background:#fff;color:var(--navy);padding:10px 14px;z-index:100;border-radius:0 0 10px 0;font-weight:700}
-.skip-link:focus{left:0}
+.skip-link{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link:focus{position:fixed;inset-inline-start:8px;top:8px;width:auto;height:auto;margin:0;padding:10px 14px;clip:auto;background:#fff;color:var(--navy);z-index:100;border-radius:0 0 10px 0;font-weight:700}
 :focus-visible{outline:3px solid #ffd34d;outline-offset:2px;border-radius:6px}
 
 /* Notification bell */
 .bell{position:relative;cursor:pointer;color:#fff;display:flex;align-items:center;padding:6px}
 .bell-ic{font-size:20px}
 .bell-count{position:absolute;top:0;inset-inline-end:0;min-width:18px;height:18px;padding:0 4px;background:var(--alert);color:#fff;border-radius:999px;font-size:11px;font-weight:800;display:grid;place-items:center}
-.bell-panel{position:absolute;top:46px;inset-inline-end:0;width:320px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;z-index:60}
+.bell-panel{position:absolute;top:46px;inset-inline-end:0;width:320px;max-width:calc(100vw - 24px);background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;z-index:60}
 .bell-h{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:800}
 .bell-h a{font-size:12px;color:var(--navy);font-weight:600}
 .bell-list{max-height:340px;overflow:auto}
