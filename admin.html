@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Dismissal Admin</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="Dismissal Admin">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <h1 class="page-title" data-i18n="admin_dash"></h1>
+  <p class="page-sub">Al-Noor International School · Dismissal 14:30</p>
+
+  <div class="grid grid-2">
+    <!-- First-login approvals -->
+    <div class="card">
+      <div class="card-h" data-i18n="pending_first_login"></div>
+      <div class="card-b" id="firstLogins"></div>
+    </div>
+
+    <!-- Override deadline + dismissal time frames + config -->
+    <div class="card">
+      <div class="card-h" data-i18n="dismissal_frames"></div>
+      <div class="card-b">
+        <p class="muted" style="font-size:13px" data-i18n="frames_help"></p>
+        <div id="bandConfig"></div>
+        <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+        <div class="field">
+          <label data-i18n="override_deadline"></label>
+          <select id="deadline">
+            <option value="30">30 min before dismissal</option>
+            <option value="45">45 min before dismissal</option>
+            <option value="60">60 min before dismissal</option>
+          </select>
+        </div>
+        <p class="muted" style="font-size:13px" data-i18n="deadline_help"></p>
+        <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+        <h4 style="margin:0 0 8px" data-i18n="config_methods"></h4>
+        <div id="methodConfig"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Override requests -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-h">
+      <span data-i18n="override_requests"></span>
+      <span class="spacer" style="flex:1"></span>
+      <span class="badge badge-amber" id="ovCount"></span>
+    </div>
+    <div style="overflow:auto">
+      <table class="table"><thead><tr>
+        <th>ID</th><th data-i18n="student"></th><th data-i18n="method"></th><th data-i18n="time"></th><th data-i18n="status"></th><th data-i18n="actions"></th>
+      </tr></thead><tbody id="ovBody"></tbody></table>
+    </div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  function renderFirst(){
+    const c=document.getElementById("firstLogins");c.innerHTML="";
+    const fl=SD.state().firstLogins;
+    if(!fl.length){c.innerHTML="<p class='muted'>"+(SD.curLang()==="ar"?"لا توجد طلبات":"No pending requests")+"</p>";return;}
+    fl.forEach(f=>{
+      const row=document.createElement("div");
+      row.className="card pad";row.style.marginBottom="10px";
+      row.style.display="flex";row.style.alignItems="center";row.style.gap="10px";
+      row.innerHTML="<div style='flex:1'><strong>"+f.parent+"</strong><div class='muted' style='font-size:13px'>"+f.kid+" · "+f.time+"</div></div>";
+      const ok=document.createElement("button");ok.className="btn btn-success";ok.textContent=SD.t("approve");
+      const no=document.createElement("button");no.className="btn btn-ghost";no.textContent=SD.t("deny");
+      ok.onclick=()=>{decide(f,true);};no.onclick=()=>{decide(f,false);};
+      row.appendChild(ok);row.appendChild(no);c.appendChild(row);
+    });
+  }
+  function decide(f,approved){
+    const st=SD.state();
+    st.firstLogins=st.firstLogins.filter(x=>x.id!==f.id);
+    st.audit.unshift({time:nowTime(),actor:"Admin · Reem",
+      event_en:(approved?"Approved":"Denied")+" first login for "+f.parent,
+      event_ar:(approved?"اعتماد":"رفض")+" أول دخول لـ "+f.parent,type:approved?"approved":"denied"});
+    SD.save();renderFirst();
+    document.getElementById("ovPendingMaybe");
+    SD.toast((approved?"Approved":"Denied")+" first login · "+f.parent+" notified",approved?"success":"warn");
+  }
+
+  function renderBands(){
+    const wrap=document.getElementById("bandConfig");if(!wrap)return;wrap.innerHTML="";
+    const mins=SD.state().overrideDeadlineMin||30;
+    SD.gradeBands().forEach(b=>{
+      const cut=SD.timeToDate(b.dismissal);cut.setMinutes(cut.getMinutes()-mins);
+      const cutTxt=cut.toLocaleTimeString(SD.curLang()==="ar"?"ar":"en-US",{hour:"2-digit",minute:"2-digit"});
+      const row=document.createElement("div");
+      row.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
+      row.innerHTML="<div style='flex:1'><strong>"+SD.bandName(b)+"</strong><div class='muted' style='font-size:12px'>"+SD.t("cutoff_label")+": "+cutTxt+"</div></div>";
+      const inp=document.createElement("input");inp.type="time";inp.className="input";inp.style.maxWidth="140px";inp.value=b.dismissal;
+      inp.onchange=()=>{b.dismissal=inp.value;SD.save();renderBands();SD.toast(SD.bandName(b)+" "+SD.t("dismissal_time")+" → "+inp.value,"");};
+      row.appendChild(inp);wrap.appendChild(row);
+    });
+  }
+
+  function renderMethods(){
+    const wrap=document.getElementById("methodConfig");wrap.innerHTML="";
+    SD.state().students.slice(0,3).forEach(s=>{
+      const row=document.createElement("div");row.className="field";
+      row.innerHTML="<label>"+SD.studentName(s)+" ("+s.grade+")</label>";
+      const sel=document.createElement("select");
+      [["bus2","bus2"],["bus1m","bus1m"],["bus1a","bus1a"],["car","car"]].forEach(o=>{
+        const op=document.createElement("option");op.value=o[0];op.textContent=SD.t(o[1]);
+        if(s.method===o[0])op.selected=true;sel.appendChild(op);
+      });
+      sel.onchange=()=>{s.method=sel.value;SD.save();SD.toast("Updated "+SD.studentName(s)+" → "+SD.t(sel.value),"");};
+      row.appendChild(sel);wrap.appendChild(row);
+    });
+  }
+
+  function renderOverrides(){
+    const b=document.getElementById("ovBody");b.innerHTML="";
+    const ovs=SD.state().overrides;
+    document.getElementById("ovCount").textContent=ovs.filter(o=>o.status==="pending").length+" "+SD.t("st_pending");
+    ovs.forEach(o=>{
+      const tr=document.createElement("tr");
+      const action=o.status==="pending"
+        ? "<button class='btn btn-success' data-act='ap'>"+SD.t("approve")+"</button> <button class='btn btn-ghost' data-act='dn'>"+SD.t("deny")+"</button>"
+        : "<span class='muted'>—</span>";
+      tr.innerHTML="<td>"+o.id+"</td><td>"+o.student+"</td><td>"+SD.t(o.from)+" → "+SD.t(o.to)+"</td><td>"+o.time+"</td><td>"+SD.statusBadge(o.status)+"</td><td>"+action+"</td>";
+      const ap=tr.querySelector("[data-act='ap']"),dn=tr.querySelector("[data-act='dn']");
+      if(ap)ap.onclick=()=>decideOv(o,true);
+      if(dn)dn.onclick=()=>decideOv(o,false);
+      b.appendChild(tr);
+    });
+  }
+  function decideOv(o,approved){
+    o.status=approved?"approved":"denied";
+    o.date=SD.dateStr();
+    const st=SD.state();
+    if(approved){
+      const stu=st.students.find(s=>SD.studentName(s)===o.student||s.name_en===o.student);
+      if(stu){stu.method="car";stu.status="inqueue";}
+    }
+    st.audit.unshift({time:nowTime(),actor:"Admin · Reem",
+      event_en:(approved?"Approved":"Denied")+" override "+o.id,
+      event_ar:(approved?"اعتماد":"رفض")+" استثناء "+o.id,type:approved?"approved":"denied"});
+    SD.save();renderOverrides();
+    if(approved){
+      SD.notify("Override "+o.id+" approved for "+o.student+" — a day-scoped pickup QR is now available"+(st.securityRequired?" and routed to gate security":""),
+        "تم اعتماد الاستثناء "+o.id+" لـ "+o.student+" — أصبح رمز الاستلام اليومي متاحًا"+(st.securityRequired?" وأُرسل لأمن البوابة":""),"success");
+    }else{
+      SD.notify("Override "+o.id+" denied — "+o.student+"'s parent notified","تم رفض الاستثناء "+o.id+" — تم إخطار ولي أمر "+o.student,"warn");
+    }
+  }
+
+  function nowTime(){return new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});}
+
+  document.getElementById("deadline").value=SD.state().overrideDeadlineMin;
+  document.getElementById("deadline").onchange=function(){
+    SD.state().overrideDeadlineMin=parseInt(this.value);SD.save();renderBands();
+    SD.toast("Override deadline set to "+this.value+" min before dismissal","");
+  };
+
+  function renderAll(){renderFirst();renderMethods();renderOverrides();renderBands();}
+  document.addEventListener("langchange",renderAll);
+  document.addEventListener("sdsync",renderAll);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(renderAll,0));
+})();
+</script>
+</body>
+</html>

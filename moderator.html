@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Moderator</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="School Moderator">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <h1 class="page-title" data-i18n="mod_dash"></h1>
+  <p class="page-sub">Al-Noor International School · Riyadh</p>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="overview" data-i18n="tab_overview"></div>
+    <div class="tab" data-tab="register" data-i18n="tab_register"></div>
+    <div class="tab" data-tab="invite" data-i18n="tab_invite"></div>
+    <div class="tab" data-tab="qr" data-i18n="tab_qr"></div>
+    <div class="tab" data-tab="audit" data-i18n="tab_audit"></div>
+    <div class="tab" data-tab="terms" data-i18n="tab_terms"></div>
+  </div>
+
+  <!-- Overview -->
+  <section data-pane="overview">
+    <div class="grid grid-4" style="margin-bottom:16px">
+      <div class="card pad stat"><span class="num">312</span><span class="lbl" data-i18n="total_students"></span></div>
+      <div class="card pad stat"><span class="num">498</span><span class="lbl" data-i18n="total_parents"></span></div>
+      <div class="card pad stat"><span class="num" id="ovPending">2</span><span class="lbl" data-i18n="pending_approvals"></span></div>
+      <div class="card pad stat"><span class="num">41</span><span class="lbl" data-i18n="releases_today"></span></div>
+    </div>
+    <div class="card">
+      <div class="card-h">
+        <span data-i18n="security_toggle"></span>
+        <span class="spacer" style="flex:1"></span>
+        <span class="badge" id="secBadge"></span>
+      </div>
+      <div class="card-b">
+        <p class="muted" data-i18n="security_toggle_d"></p>
+        <button class="btn btn-ghost" id="secToggle"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Register / School setup -->
+  <section data-pane="register" class="hidden">
+    <div class="card pad">
+      <div class="grid grid-2">
+        <div class="field"><label>School name</label><input class="input" value="Al-Noor International School"></div>
+        <div class="field"><label>City</label><input class="input" value="Riyadh"></div>
+        <div class="field"><label>Address</label><input class="input" value="King Fahd Rd, Al-Olaya"></div>
+      </div>
+      <h4 style="margin:6px 0 4px" data-i18n="dismissal_frames"></h4>
+      <p class="muted" style="font-size:13px;margin-top:0" data-i18n="frames_help"></p>
+      <div id="bandSetup"></div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="SD.toast('School profile saved','success')" data-i18n="save"></button>
+    </div>
+  </section>
+
+  <!-- Invite parents -->
+  <section data-pane="invite" class="hidden">
+    <div class="card pad">
+      <h3 style="margin-top:0" data-i18n="invite_partner"></h3>
+      <div class="grid grid-2">
+        <div class="field"><label data-i18n="parent_phone"></label><input class="input" placeholder="+966 5x xxx xxxx"></div>
+        <div class="field"><label data-i18n="parent_email"></label><input class="input" type="email"></div>
+        <div class="field"><label data-i18n="coparent_phone"></label><input class="input" placeholder="+966 5x xxx xxxx"></div>
+        <div class="field"><label data-i18n="coparent_email"></label><input class="input" type="email"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin:6px 0">
+        <h4 style="margin:0;flex:1" data-i18n="children"></h4>
+        <button class="btn btn-ghost" id="addKid" type="button">＋ <span data-i18n="add_child"></span></button>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:0" data-i18n="children_help"></p>
+      <div id="kidRows"></div>
+      <button class="btn btn-primary" id="sendInvite" style="margin-top:6px" data-i18n="send_invite"></button>
+    </div>
+  </section>
+
+  <!-- QR -->
+  <section data-pane="qr" class="hidden">
+    <div class="grid grid-3" id="qrGrid"></div>
+  </section>
+
+  <!-- Audit -->
+  <section data-pane="audit" class="hidden">
+    <div class="card">
+      <div class="card-h">
+        <span data-i18n="tab_audit"></span>
+        <span class="spacer" style="flex:1"></span>
+        <input class="input" id="auditFilter" style="max-width:200px;padding:8px 10px" data-i18n-ph="filter_log">
+        <button class="btn btn-ghost" id="exportCsv" style="margin-inline-start:8px" data-i18n="export_csv"></button>
+      </div>
+      <div style="overflow:auto">
+        <table class="table"><thead><tr>
+          <th data-i18n="time"></th><th>Actor</th><th>Event</th><th data-i18n="status"></th>
+        </tr></thead><tbody id="auditBody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Terms -->
+  <section data-pane="terms" class="hidden">
+    <div class="card pad">
+      <p class="muted" data-i18n="terms_intro"></p>
+      <textarea rows="8" class="input">1. Parents agree to use SafeDismiss only for authorized pickups.
+2. Pickup QR codes are personal and must not be shared.
+3. The school may require gate security verification at its discretion.
+4. Override requests close 30 minutes before dismissal.
+5. All dismissal actions are logged for safety and auditing.</textarea>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="SD.toast('Terms published to all parents','success')" data-i18n="save"></button>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  const tabs=document.getElementById("tabs");
+  tabs.addEventListener("click",e=>{
+    const t=e.target.closest(".tab");if(!t)return;
+    tabs.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.querySelectorAll("[data-pane]").forEach(p=>p.classList.toggle("hidden",p.dataset.pane!==t.dataset.tab));
+  });
+
+  function renderSecurity(){
+    const on=SD.state().securityRequired;
+    const badge=document.getElementById("secBadge");
+    badge.className="badge "+(on?"badge-green":"badge-red");
+    badge.textContent=on?SD.t("required"):SD.t("not_required");
+    document.getElementById("secToggle").textContent=on?SD.t("not_required"):SD.t("required");
+  }
+  document.getElementById("secToggle").onclick=()=>{
+    SD.state().securityRequired=!SD.state().securityRequired;SD.save();
+    renderSecurity();
+    SD.toast(SD.state().securityRequired?"Gate security set to REQUIRED":"Gate security set to NOT required",
+      SD.state().securityRequired?"success":"warn");
+  };
+
+  // Editable per-band dismissal time frames (school setup)
+  function renderBandSetup(){
+    const wrap=document.getElementById("bandSetup");if(!wrap)return;wrap.innerHTML="";
+    SD.gradeBands().forEach(b=>{
+      const row=document.createElement("div");
+      row.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:8px";
+      row.innerHTML="<div style='flex:1'><strong>"+SD.bandName(b)+"</strong></div>";
+      const inp=document.createElement("input");inp.type="time";inp.className="input";inp.style.maxWidth="150px";inp.value=b.dismissal;
+      inp.onchange=()=>{b.dismissal=inp.value;SD.save();SD.toast(SD.bandName(b)+" "+SD.t("dismissal_time")+" → "+inp.value,"success");};
+      const lbl=document.createElement("label");lbl.style.cssText="font-size:13px;color:var(--muted)";lbl.textContent=SD.t("dismissal_time");
+      row.appendChild(lbl);row.appendChild(inp);wrap.appendChild(row);
+    });
+  }
+
+  // Invite: add multiple children, each with Name / ID / Dismissal level
+  let kidSeq=0;
+  function bandOptions(sel){
+    return SD.gradeBands().map(b=>"<option value='"+b.id+"' "+(b.id===sel?"selected":"")+">"+SD.bandName(b)+" · "+b.dismissal+"</option>").join("");
+  }
+  function addKidRow(prefill){
+    const rows=document.getElementById("kidRows");if(!rows)return;
+    const id="kr"+(kidSeq++);
+    const div=document.createElement("div");div.className="card pad";div.style.cssText="margin-bottom:10px;background:var(--navy-50)";div.dataset.kid=id;
+    div.innerHTML=
+      "<div class='grid grid-3'>"+
+        "<div class='field' style='margin:0'><label>"+SD.t("student_name")+"</label><input class='input k-name' placeholder='"+(SD.curLang()==="ar"?"اسم الطالب":"e.g. Layla Al-Harbi")+"' value='"+((prefill&&prefill.name)||"")+"'></div>"+
+        "<div class='field' style='margin:0'><label>"+SD.t("student_id")+"</label><input class='input k-id' placeholder='S-1xxx' value='"+((prefill&&prefill.id)||"")+"'></div>"+
+        "<div class='field' style='margin:0'><label>"+SD.t("dismissal_level")+"</label><select class='k-band'>"+bandOptions((prefill&&prefill.band)||"")+"</select></div>"+
+      "</div>"+
+      "<div style='text-align:end;margin-top:6px'><button type='button' class='btn btn-ghost k-remove' style='padding:4px 10px;font-size:13px;color:var(--alert)'>✕ "+SD.t("remove")+"</button></div>";
+    div.querySelector(".k-remove").onclick=()=>div.remove();
+    rows.appendChild(div);
+  }
+  const addKidBtn=document.getElementById("addKid");
+  if(addKidBtn)addKidBtn.onclick=()=>addKidRow();
+
+  document.getElementById("sendInvite").onclick=()=>{
+    const rows=[...document.querySelectorAll("#kidRows [data-kid]")];
+    const kids=rows.map(r=>({
+      name:r.querySelector(".k-name").value.trim(),
+      id:r.querySelector(".k-id").value.trim(),
+      band:r.querySelector(".k-band").value
+    })).filter(k=>k.name);
+    if(!kids.length){SD.toast(SD.curLang()==="ar"?"أضف طفلًا واحدًا على الأقل":"Add at least one child","warn");return;}
+    // sample grade per band so each kid maps to the right dismissal level
+    const sampleGrade={kg:"KG2",lower:"2-A",upper:"5-A"};
+    const st=SD.state();
+    kids.forEach((k,i)=>{
+      const sid=k.id||("S-"+Math.floor(1200+Math.random()*800));
+      st.students.push({id:sid,name_en:k.name,name_ar:k.name,grade:sampleGrade[k.band]||"5-A",method:"bus2",parent:"Invited Parent",status:"waiting"});
+      st.audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",
+        event_en:"Invited child "+k.name+" ("+sid+", "+k.band+" band)",event_ar:"دعوة الطفل "+k.name+" ("+sid+"، مرحلة "+k.band+")",type:"info"});
+    });
+    SD.save();renderQR();
+    const list=kids.map(k=>{const b=SD.gradeBands().find(x=>x.id===k.band);return "<li>"+k.name+(k.id?(" · "+k.id):"")+" — "+SD.bandName(b)+" ("+SD.t("dismissal_time")+" "+b.dismissal+")</li>";}).join("");
+    SD.modal({title:SD.t("send_invite"),
+      body:"<p>"+(SD.curLang()==="ar"?"تم إرسال دعوات SMS/بريد إلى ولي الأمر والشريك، وإنشاء حسابات الأبناء التالية برموز QR:":"SMS/email invitations sent to parent &amp; co-parent. The following children were created with onboarding QR codes:")+"</p><ul style='margin:6px 0 10px;padding-inline-start:18px'>"+list+"</ul><div class='qr'>"+SD.qrSvg("invite-"+Date.now())+"</div>",
+      buttons:[{label:SD.t("close"),class:"btn-primary"}]});
+    document.getElementById("kidRows").innerHTML="";addKidRow();
+  };
+
+  function renderQR(){
+    const grid=document.getElementById("qrGrid");grid.innerHTML="";
+    SD.state().students.forEach(s=>{
+      const d=document.createElement("div");d.className="card pad center";
+      d.innerHTML="<div class='qr'>"+SD.qrSvg(s.id)+"</div>"+
+        "<h4 style='margin:12px 0 2px'>"+SD.studentName(s)+"</h4>"+
+        "<div class='muted' style='font-size:13px'>"+SD.t("grade")+" "+s.grade+" · "+s.id+"</div>"+
+        "<button class='btn btn-ghost' style='margin-top:10px' data-i18n='download_qr'>"+SD.t("download_qr")+"</button>";
+      d.querySelector("button").onclick=()=>SD.toast("QR for "+SD.studentName(s)+" downloaded","");
+      grid.appendChild(d);
+    });
+  }
+  function renderAudit(){
+    const b=document.getElementById("auditBody");b.innerHTML="";
+    const q=(document.getElementById("auditFilter")||{}).value||"";
+    const qq=q.toLowerCase();
+    SD.state().audit.filter(a=>{
+      if(!qq)return true;
+      return (a.time+" "+a.actor+" "+a.event_en+" "+a.event_ar+" "+a.type).toLowerCase().indexOf(qq)>-1;
+    }).forEach(a=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML="<td>"+a.time+"</td><td>"+a.actor+"</td><td>"+(SD.curLang()==="ar"?a.event_ar:a.event_en)+"</td><td>"+SD.statusBadge(a.type==="info"?"inqueue":a.type)+"</td>";
+      b.appendChild(tr);
+    });
+  }
+  function exportCsv(){
+    const q=((document.getElementById("auditFilter")||{}).value||"").toLowerCase();
+    const rows=SD.state().audit.filter(a=>!q||(a.time+" "+a.actor+" "+a.event_en+" "+a.type).toLowerCase().indexOf(q)>-1);
+    const esc=s=>'"'+String(s).replace(/"/g,'""')+'"';
+    const csv=["Time,Actor,Event,Type"].concat(rows.map(a=>[a.time,a.actor,a.event_en,a.type].map(esc).join(","))).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="safedismiss-audit.csv";a.click();
+    SD.toast("Audit log exported ("+rows.length+" rows)","success");
+  }
+  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();}
+  const af=document.getElementById("auditFilter");if(af)af.oninput=renderAudit;
+  const ec=document.getElementById("exportCsv");if(ec)ec.onclick=exportCsv;
+  addKidRow();
+  document.addEventListener("langchange",renderAll);
+  document.addEventListener("sdsync",renderAll);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(renderAll,0));
+})();
+</script>
+</body>
+</html>

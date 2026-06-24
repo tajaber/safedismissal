@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Security Gate</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="Security / Gate">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <h1 class="page-title" data-i18n="sec_dash"></h1>
+  <p class="page-sub">Gate 2 · Officer Faisal
+    <label style="margin-inline-start:14px;font-size:14px;cursor:pointer"><input type="checkbox" id="outdoor"> <span data-i18n="outdoor_mode"></span></label>
+  </p>
+
+  <div class="grid grid-2">
+    <!-- Scanner -->
+    <div class="card pad center">
+      <div id="scanBox" style="height:200px;border:2px dashed var(--navy);border-radius:14px;display:grid;place-items:center;background:var(--navy-50);font-size:48px">📷</div>
+      <button class="btn btn-primary btn-lg btn-block" id="scanBtn" style="margin-top:14px" data-i18n="scan_qr"></button>
+      <div id="scanResult" class="hidden card pad" style="margin-top:14px;text-align:start"></div>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+      <div style="text-align:start">
+        <label style="font-weight:600;font-size:14px" data-i18n="search_phone"></label>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <input class="input" id="phoneSearch" placeholder="+966 5x xxx xxxx">
+          <button class="btn btn-ghost" id="searchBtn" data-i18n="search"></button>
+        </div>
+        <div id="searchResult"></div>
+      </div>
+    </div>
+
+    <!-- Active queue -->
+    <div class="card">
+      <div class="card-h" data-i18n="active_queue"></div>
+      <div style="overflow:auto">
+        <table class="table"><thead><tr>
+          <th data-i18n="student"></th><th data-i18n="parent"></th><th data-i18n="actions"></th>
+        </tr></thead><tbody id="queueBody"></tbody></table>
+      </div>
+      <div id="log" style="padding:14px 18px;border-top:1px solid var(--line);font-size:13px;color:var(--emerald-600);min-height:24px"></div>
+    </div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  let scanned=null;
+
+  function queue(){return SD.state().students.filter(s=>s.status==="inqueue");}
+
+  function renderQueue(){
+    const b=document.getElementById("queueBody");b.innerHTML="";
+    const q=queue();
+    if(!q.length){b.innerHTML="<tr><td colspan='3' class='muted center' style='padding:24px'>"+(SD.curLang()==="ar"?"لا أحد في الطابور":"Queue is empty")+"</td></tr>";}
+    q.forEach(s=>{
+      const tr=document.createElement("tr");tr.dataset.id=s.id;
+      const enabled=scanned===s.id;
+      tr.innerHTML="<td><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.grade+"</div></td>"+
+        "<td>"+s.parent+"</td>"+
+        "<td><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+SD.t("confirm_release")+"</button></td>";
+      const rb=tr.querySelector("[data-rel]");
+      if(rb&&enabled)rb.onclick=()=>release(s,tr);
+      b.appendChild(tr);
+    });
+  }
+
+  function release(s,tr){
+    tr.classList.add("row-flash");
+    s.status="released";
+    SD.state().audit.unshift({time:now(),actor:"Security · Gate 2",
+      event_en:"Released "+s.name_en+" (QR verified)",event_ar:"تم تسليم "+s.name_ar+" (تم التحقق من QR)",type:"released"});
+    SD.save();
+    document.getElementById("log").textContent="✅ "+SD.studentName(s)+" — "+SD.t("released_saved")+" "+now();
+    SD.notify(SD.studentName(s)+" released at Gate 2 — admin & parent notified",
+      "تم تسليم "+s.name_ar+" عند البوابة 2 — تم إخطار الإدارة وولي الأمر","success");
+    scanned=null;
+    setTimeout(renderQueue,1000);
+  }
+
+  document.getElementById("scanBtn").onclick=()=>{
+    const box=document.getElementById("scanBox");
+    box.innerHTML="<div style='font-size:18px;font-weight:700;color:var(--navy)'>"+SD.t("scanning")+"</div>";
+    document.getElementById("scanBtn").disabled=true;
+    setTimeout(()=>{
+      const q=queue();
+      const s=q[0];
+      box.innerHTML="<div style='font-size:48px'>✅</div>";
+      document.getElementById("scanBtn").disabled=false;
+      if(!s){box.innerHTML="<div style='font-size:48px'>📷</div>";SD.toast("Queue empty — nothing to scan","warn");return;}
+      scanned=s.id;
+      const info=SD.pickupInfo(s);
+      const res=document.getElementById("scanResult");
+      res.classList.remove("hidden");
+      const refTxt=info.eligible?("<br><span class='badge badge-green'>"+SD.t("scan_ref")+": "+info.ref+"</span><br><span class='muted' style='font-size:12px'>"+SD.t("qr_valid_today")+" · Token "+info.token+"</span>"):("<br><span class='badge badge-red'>"+SD.t("qr_need_override")+"</span>");
+      res.innerHTML="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br><span class='muted'>"+SD.t("parent")+": "+s.parent+"</span><br>"+SD.statusBadge("inqueue")+refTxt;
+      if(!info.eligible){scanned=null;SD.toast("Pickup QR invalid for today — verify approval","danger");renderQueue();return;}
+      renderQueue();
+      SD.toast("QR matched: "+SD.studentName(s)+" ("+info.ref+") — release enabled","success");
+    },1400);
+  };
+
+  document.getElementById("searchBtn").onclick=()=>{
+    const v=document.getElementById("phoneSearch").value.trim().toLowerCase();
+    const r=document.getElementById("searchResult");
+    const q=queue();
+    const matches=!v?q:q.filter(s=>
+      s.parent.toLowerCase().indexOf(v)>-1 ||
+      SD.studentName(s).toLowerCase().indexOf(v)>-1 ||
+      ("+96650"+ (s.id.replace(/\D/g,"")) ).indexOf(v.replace(/\s/g,""))>-1 ||
+      "4587".indexOf(v.replace(/\D/g,""))>-1 && v.replace(/\D/g,"").length>=3
+    );
+    if(!matches.length){r.innerHTML="<p class='muted' style='margin-top:10px'>"+(SD.curLang()==="ar"?"لا نتائج مطابقة":"No match in active queue")+"</p>";return;}
+    r.innerHTML=matches.map(s=>{
+      const info=SD.pickupInfo(s);
+      return "<div class='card pad' style='margin-top:10px'><strong>"+s.parent+"</strong> — "+SD.studentName(s)+
+      "<div class='muted' style='font-size:13px'>"+(s.grade)+" · "+(info.eligible?(SD.t("scan_ref")+": "+info.ref):"—")+"</div>"+
+      "<button class='btn btn-success' style='margin-top:8px' data-vid='"+s.id+"'>"+SD.t("verify_identity")+"</button></div>";
+    }).join("");
+    r.querySelectorAll("[data-vid]").forEach(b=>{
+      b.onclick=()=>{const s=q.find(x=>x.id===b.dataset.vid);scanned=s.id;renderQueue();SD.toast(SD.t("matched")+" · "+SD.studentName(s),"success");};
+    });
+  };
+
+  function now(){return new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});}
+
+  // B1: outdoor / high-contrast mode (persists)
+  const outdoor=document.getElementById("outdoor");
+  function applyOutdoor(on){document.body.classList.toggle("hi-contrast",on);outdoor.checked=on;}
+  applyOutdoor(localStorage.getItem("sd_outdoor")==="1");
+  outdoor.onchange=()=>{localStorage.setItem("sd_outdoor",outdoor.checked?"1":"0");applyOutdoor(outdoor.checked);};
+
+  document.addEventListener("langchange",renderQueue);
+  document.addEventListener("sdsync",renderQueue);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(renderQueue,0));
+})();
+</script>
+</body>
+</html>

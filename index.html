@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Prototype</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<header class="section" style="background:linear-gradient(160deg,#0f2c4d,#15396a);color:#fff">
+  <div class="container center">
+    <div style="font-size:46px">🛡️</div>
+    <h1 style="font-size:34px;margin:8px 0 6px" data-i18n="app_name"></h1>
+    <p style="opacity:.85;font-size:18px;margin:0" data-i18n="tagline"></p>
+    <p style="opacity:.7;margin-top:10px" data-i18n="choose_role"></p>
+  </div>
+</header>
+
+<main id="main" class="container section">
+  <div class="grid grid-3">
+    <a class="role-card" href="login.html?role=moderator">
+      <div class="ic" style="background:var(--navy-50);color:var(--navy)">🏫</div>
+      <h3 style="margin:0 0 4px" data-i18n="role_moderator"></h3>
+      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_moderator_d"></p>
+    </a>
+    <a class="role-card" href="login.html?role=admin">
+      <div class="ic" style="background:var(--navy-50);color:var(--navy)">🗂️</div>
+      <h3 style="margin:0 0 4px" data-i18n="role_admin"></h3>
+      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_admin_d"></p>
+    </a>
+    <a class="role-card" href="login.html?role=parent">
+      <div class="ic" style="background:var(--emerald-50);color:var(--emerald-600)">👪</div>
+      <h3 style="margin:0 0 4px" data-i18n="role_parent"></h3>
+      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_parent_d"></p>
+    </a>
+    <a class="role-card" href="login.html?role=security">
+      <div class="ic" style="background:var(--emerald-50);color:var(--emerald-600)">🛂</div>
+      <h3 style="margin:0 0 4px" data-i18n="role_security"></h3>
+      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_security_d"></p>
+    </a>
+    <a class="role-card" href="dashboard.html">
+      <div class="ic" style="background:#fdf6e3;color:var(--amber)">📊</div>
+      <h3 style="margin:0 0 4px" data-i18n="role_dashboard"></h3>
+      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_dashboard_d"></p>
+    </a>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

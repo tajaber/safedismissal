@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Secure Login</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <div class="phone">
+    <div class="screen">
+      <div class="center" style="margin-bottom:14px">
+        <div style="font-size:34px">🛡️</div>
+        <h2 style="margin:6px 0 0" data-i18n="secure_login"></h2>
+        <p class="muted" id="roleLine" style="margin:2px 0 0;font-size:14px"></p>
+      </div>
+
+      <!-- Step 1: credentials -->
+      <div id="step1">
+        <div class="field">
+          <label data-i18n="phone_or_email"></label>
+          <input class="input" id="userId" value="+966 50 123 4587">
+        </div>
+        <div class="field">
+          <label data-i18n="password"></label>
+          <input class="input" type="password" value="demo1234">
+        </div>
+        <button class="btn btn-primary btn-block" id="toMfa" data-i18n="continue"></button>
+      </div>
+
+      <!-- Step 2: MFA -->
+      <div id="step2" class="hidden">
+        <h3 class="center" style="margin:6px 0" data-i18n="mfa_title"></h3>
+        <p class="muted center" style="font-size:14px" data-i18n="mfa_sub"></p>
+        <div class="otp" id="otp">
+          <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+          <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+          <input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+        </div>
+        <button class="btn btn-success btn-block" id="verify" data-i18n="verify"></button>
+        <div class="center" style="margin-top:12px">
+          <a href="#" class="muted" id="resend" style="font-size:14px" data-i18n="resend_code"></a>
+          <div class="badge badge-amber" style="margin-top:10px" data-i18n="demo_hint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  const params=new URLSearchParams(location.search);
+  const role=params.get("role")||"parent";
+  const dest={moderator:"moderator.html",admin:"admin.html",parent:"parent.html",security:"security.html"}[role]||"parent.html";
+  const roleKey={moderator:"role_moderator",admin:"role_admin",parent:"role_parent",security:"role_security"}[role];
+
+  function paintRole(){document.getElementById("roleLine").textContent=SD.t(roleKey);}
+  document.addEventListener("langchange",paintRole);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(paintRole,0));
+
+  document.getElementById("toMfa").onclick=()=>{
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("step2").classList.remove("hidden");
+    SD.toast(SD.curLang()==="ar"?"تم إرسال رمز التحقق عبر SMS":"Verification code sent via SMS","success");
+    const f=document.querySelector("#otp input");if(f)f.focus();
+  };
+  const otp=document.querySelectorAll("#otp input");
+  otp.forEach((inp,i)=>{
+    inp.addEventListener("input",()=>{if(inp.value&&i<otp.length-1)otp[i+1].focus();});
+    inp.addEventListener("keydown",e=>{if(e.key==="Backspace"&&!inp.value&&i>0)otp[i-1].focus();});
+  });
+  document.getElementById("verify").onclick=()=>{
+    SD.toast(SD.curLang()==="ar"?"تم التحقق بنجاح":"Verified successfully","success");
+    setTimeout(()=>location.href=dest,650);
+  };
+  document.getElementById("resend").onclick=(e)=>{e.preventDefault();SD.toast(SD.curLang()==="ar"?"تمت إعادة إرسال الرمز":"Code resent","");};
+})();
+</script>
+</body>
+</html>

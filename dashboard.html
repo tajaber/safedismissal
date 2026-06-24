@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Dashboard</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="Web Dashboard">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <h1 class="page-title" data-i18n="dash_title"></h1>
+  <p class="page-sub">All schools · Live · <span id="clock"></span></p>
+
+  <div class="grid grid-4" style="margin-bottom:16px">
+    <div class="card pad stat"><span class="num">8</span><span class="lbl" data-i18n="total_schools"></span></div>
+    <div class="card pad stat"><span class="num">2,184</span><span class="lbl" data-i18n="total_parents"></span></div>
+    <div class="card pad stat"><span class="num">1,392</span><span class="lbl" data-i18n="total_students"></span></div>
+    <div class="card pad stat"><span class="num" id="kPending">—</span><span class="lbl" data-i18n="pending_approvals"></span></div>
+  </div>
+  <div class="grid grid-3" style="margin-bottom:16px">
+    <div class="card pad stat"><span class="num" id="kReleased">—</span><span class="lbl" data-i18n="releases_today"></span></div>
+    <div class="card pad stat"><span class="num" id="kOverrides">—</span><span class="lbl" data-i18n="overrides_today"></span></div>
+    <div class="card pad stat"><span class="num" id="kQueue">—</span><span class="lbl" data-i18n="st_inqueue"></span></div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-h" data-i18n="method_split"></div>
+      <div class="card-b" id="methodSplit"></div>
+    </div>
+    <div class="card">
+      <div class="card-h" data-i18n="live_activity"></div>
+      <div class="card-b" id="activity" style="max-height:320px;overflow:auto"></div>
+    </div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  function bar(label,count,total,color){
+    const pct=total?Math.round(count/total*100):0;
+    return "<div style='margin-bottom:12px'><div style='display:flex;justify-content:space-between;font-size:13px;font-weight:600'><span>"+label+"</span><span>"+count+" ("+pct+"%)</span></div>"+
+      "<div style='height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:4px'><div style='height:100%;width:"+pct+"%;background:"+color+"'></div></div></div>";
+  }
+  function render(){
+    const st=SD.state();
+    document.getElementById("kPending").textContent=st.firstLogins.length+st.overrides.filter(o=>o.status==="pending").length;
+    document.getElementById("kReleased").textContent=41+st.students.filter(s=>s.status==="released").length;
+    document.getElementById("kOverrides").textContent=st.overrides.length;
+    document.getElementById("kQueue").textContent=st.students.filter(s=>s.status==="inqueue").length;
+
+    const total=st.students.length;
+    const bus=st.students.filter(s=>s.method.startsWith("bus")).length;
+    const car=st.students.filter(s=>s.method==="car").length;
+    document.getElementById("methodSplit").innerHTML=
+      bar(SD.t("car"),car,total,"var(--emerald)")+
+      bar("Bus",bus,total,"var(--navy)");
+
+    const a=document.getElementById("activity");a.innerHTML="";
+    st.audit.forEach(x=>{
+      const d=document.createElement("div");
+      d.style.cssText="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)";
+      d.innerHTML="<span class='muted' style='font-size:12px;min-width:64px'>"+x.time+"</span>"+
+        "<span style='flex:1;font-size:14px'>"+(SD.curLang()==="ar"?x.event_ar:x.event_en)+"<div class='muted' style='font-size:12px'>"+x.actor+"</div></span>"+
+        SD.statusBadge(x.type==="info"?"inqueue":x.type);
+      a.appendChild(d);
+    });
+  }
+  function tick(){document.getElementById("clock").textContent=new Date().toLocaleTimeString();}
+  setInterval(tick,1000);tick();
+  document.addEventListener("langchange",render);
+  document.addEventListener("sdsync",render);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(render,0));
+})();
+</script>
+</body>
+</html>

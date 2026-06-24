@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Parent</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="Parent / Co-Parent">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <!-- Onboarding gate (terms + invite) -->
+  <div id="onboard" class="phone">
+    <div class="screen center">
+      <div style="font-size:34px">👪</div>
+      <h2 style="margin:6px 0" data-i18n="accept_invite"></h2>
+      <p class="muted" style="font-size:14px">Noura Al-Harbi · Al-Noor International School</p>
+      <div class="card pad" style="text-align:start;margin:14px 0">
+        <p class="muted" style="font-size:13px;margin:0">By continuing you accept the school's Terms &amp; Conditions, QR usage policy, and dismissal rules.</p>
+      </div>
+      <label style="display:flex;gap:10px;align-items:center;text-align:start;margin-bottom:14px">
+        <input type="checkbox" id="agree" style="width:20px;height:20px">
+        <span data-i18n="accept_terms"></span>
+      </label>
+      <button class="btn btn-success btn-block" id="enter" disabled data-i18n="accept_invite"></button>
+    </div>
+  </div>
+
+  <!-- Parent app -->
+  <div id="app" class="phone hidden">
+    <div class="screen">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <div style="font-size:26px">👋</div>
+        <div><strong id="profileName">Noura Al-Harbi</strong><div class="muted" style="font-size:13px" id="roleTag"></div></div>
+        <span class="spacer" style="flex:1"></span>
+        <button class="btn btn-ghost" id="switchProfile" style="padding:6px 10px;font-size:13px" data-i18n="switch_profile"></button>
+      </div>
+      <h3 data-i18n="my_kids"></h3>
+      <div id="kids"></div>
+    </div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  const HOUSEHOLD="Noura Al-Harbi";
+  const PROFILES=[{name:"Noura Al-Harbi",role:"parent"},{name:"Saad Al-Harbi",role:"coparent"}];
+  let pIdx=0;
+  function actor(){return PROFILES[pIdx];}
+
+  const agree=document.getElementById("agree"),enter=document.getElementById("enter");
+  agree.onchange=()=>{enter.disabled=!agree.checked;};
+  enter.onclick=()=>{
+    document.getElementById("onboard").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    render();
+    SD.toast(SD.curLang()==="ar"?"تم قبول الدعوة والشروط":"Invitation & terms accepted","success");
+  };
+
+  function methodIsCar(m){return m==="car";}
+  function arrivalEnabled(m){return m==="car"||m==="bus1a";}
+
+  function fmtLeft(ms){
+    if(ms<=0)return "0:00";
+    const m=Math.floor(ms/60000),h=Math.floor(m/60);
+    return h>0?(h+"h "+(m%60)+"m"):(m+"m");
+  }
+
+  function render(){
+    const a=actor();
+    document.getElementById("profileName").textContent=a.name;
+    document.getElementById("roleTag").textContent=SD.t(a.role==="coparent"?"coparent":"parent");
+    const kids=SD.state().students.filter(s=>s.parent===HOUSEHOLD);
+    const wrap=document.getElementById("kids");wrap.innerHTML="";
+    kids.forEach(s=>{
+      const c=document.createElement("div");c.className="card pad";c.style.marginBottom="14px";
+      const canAnnounce=arrivalEnabled(s.method);
+      // Each kid's override window is computed from ITS OWN grade band's dismissal time.
+      const od=SD.overrideInfoFor(s);
+      const bandLine="<span class='badge badge-navy' style='margin-top:6px'>"+SD.bandName(od.band)+" · "+SD.t("dismissal_time")+" "+SD.fmtTime(od.band.dismissal)+"</span>";
+      const ovLine=od.open
+        ? "<div class='muted' style='font-size:12px;margin:8px 0 0'>⏳ "+SD.t("override_closes")+" "+fmtLeft(od.msLeft)+" ("+SD.t("cutoff_label")+" "+SD.fmtTime(od.deadline.toTimeString().slice(0,5))+")</div>"
+        : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked")+"</div>";
+      c.innerHTML=
+        "<div style='display:flex;align-items:center;gap:10px'>"+
+          "<div style='width:42px;height:42px;border-radius:12px;background:var(--navy-50);display:grid;place-items:center;font-size:20px'>🎒</div>"+
+          "<div style='flex:1'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:13px'>"+SD.t("grade")+" "+s.grade+" · "+s.id+"</div></div>"+
+          SD.statusBadge(s.status)+
+        "</div>"+
+        "<div style='margin-top:8px'>"+bandLine+"</div>"+
+        "<div class='field' style='margin-top:12px'><label>"+SD.t("method")+"</label>"+
+          "<select data-k='"+s.id+"'>"+
+            opt("bus2",s.method)+opt("bus1m",s.method)+opt("bus1a",s.method)+opt("car",s.method)+
+          "</select></div>"+
+        "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+
+          "<button class='btn "+(canAnnounce?"btn-success btn-glow":"btn-ghost")+"' data-announce='"+s.id+"' "+(canAnnounce?"":"disabled")+" style='flex:1'>"+SD.t("announce_arrival")+"</button>"+
+        "</div>"+
+        "<div style='display:flex;gap:8px;margin-top:8px;flex-wrap:wrap'>"+
+          "<button class='btn btn-ghost' data-override='"+s.id+"' "+(od.open?"":"disabled")+" style='flex:1'>"+SD.t("request_override")+"</button>"+
+          "<button class='btn btn-ghost' data-qr='"+s.id+"' style='flex:1'>"+SD.t("show_qr")+"</button>"+
+        "</div>"+
+        ovLine+
+        "<div class='lane hidden' data-lane='"+s.id+"' style='margin-top:10px'><div class='slot'>A</div><div class='muted' style='font-size:13px'>"+SD.t("pull_forward")+"</div></div>";
+      wrap.appendChild(c);
+    });
+    bind();
+  }
+  function opt(v,cur){return "<option value='"+v+"' "+(cur===v?"selected":"")+">"+SD.t(v)+"</option>";}
+
+  function bind(){
+    document.querySelectorAll("select[data-k]").forEach(sel=>{
+      sel.onchange=()=>{const s=SD.state().students.find(x=>x.id===sel.dataset.k);s.method=sel.value;SD.save();render();};
+    });
+    document.querySelectorAll("[data-announce]").forEach(btn=>{
+      btn.onclick=()=>{
+        const id=btn.dataset.announce;const s=SD.state().students.find(x=>x.id===id);
+        btn.disabled=true;btn.classList.remove("btn-glow");
+        btn.innerHTML="<span class='spinner'>⏳</span> "+SD.t("announced_queue");
+        s.status="inqueue";SD.save();
+        document.querySelector("[data-lane='"+id+"']").classList.remove("hidden");
+        SD.notify(actor().name+" announced arrival for "+s.name_en+" — please pull into Lane A",
+          actor().name+" أعلن وصول "+s.name_ar+" — تقدّم إلى المسار A","success");
+        SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Co-Parent · ":"Parent · ")+actor().name,
+          event_en:"Announced arrival for "+s.name_en,event_ar:"إعلان وصول لـ "+s.name_ar,type:"info"});
+        SD.save();
+      };
+    });
+    document.querySelectorAll("[data-override]").forEach(btn=>{
+      btn.onclick=()=>{
+        const s=SD.state().students.find(x=>x.id===btn.dataset.override);
+        const od=SD.overrideInfoFor(s);
+        if(!od.open){SD.modal({title:SD.t("request_override"),body:"<p style='color:var(--alert)'>"+SD.t("override_blocked")+"</p>",buttons:[{label:SD.t("close"),class:"btn-danger"}]});return;}
+        SD.modal({title:SD.t("request_override"),
+          body:"<p>"+(SD.curLang()==="ar"?"تغيير طريقة الانصراف إلى السيارة لـ ":"Switch dismissal to Car pick-up for ")+"<strong>"+SD.studentName(s)+"</strong>?</p>"+
+               "<p class='muted' style='font-size:13px'>"+SD.bandName(od.band)+" · "+SD.t("dismissal_time")+" "+SD.fmtTime(od.band.dismissal)+"</p>",
+          buttons:[
+            {label:SD.t("cancel"),class:"btn-ghost"},
+            {label:SD.t("submit"),class:"btn-primary",onClick:()=>{
+              const exists=SD.state().overrides.find(o=>o.student===s.name_en&&o.status==="pending");
+              if(!exists){SD.state().overrides.push({id:"OV-"+Math.floor(Math.random()*900+100),student:s.name_en,from:s.method,to:"car",status:"pending",time:now(),date:SD.dateStr()});}
+              SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Co-Parent · ":"Parent · ")+actor().name,event_en:"Requested car override for "+s.name_en,event_ar:"طلب استثناء بالسيارة لـ "+s.name_ar,type:"pending"});
+              SD.save();SD.notify("Car override requested for "+s.name_en+" by "+actor().name+" — awaiting school approval","طلب استثناء بالسيارة لـ "+s.name_ar+" بواسطة "+actor().name+" — بانتظار موافقة المدرسة","");
+            }}
+          ]});
+      };
+    });
+    document.querySelectorAll("[data-qr]").forEach(btn=>{
+      btn.onclick=()=>{
+        const s=SD.state().students.find(x=>x.id===btn.dataset.qr);
+        const info=SD.pickupInfo(s);
+        if(!info.eligible){
+          const msg=info.reason==="pending"?SD.t("qr_pending"):SD.t("qr_need_override");
+          SD.modal({title:SD.t("show_qr"),
+            body:"<p style='color:#9a7400'>"+msg+"</p>",
+            buttons:[{label:SD.t("close"),class:"btn-primary"}]});
+          return;
+        }
+        SD.save();
+        const refLabel=info.ref.indexOf("CAR-")===0?SD.t("qr_car_daily"):SD.t("qr_ref")+": "+info.ref;
+        SD.modal({title:SD.t("show_qr"),
+          body:"<div class='center'><div class='qr'>"+SD.qrSvg(info.payload)+"</div>"+
+            "<p style='margin:10px 0 2px'><strong>"+SD.studentName(s)+"</strong> · "+s.id+"</p>"+
+            "<span class='badge badge-green'>"+refLabel+"</span>"+
+            "<p class='muted' style='font-size:12px;margin-top:8px'>"+SD.t("qr_valid_today")+" · "+info.date+"</p>"+
+            "<p class='muted' style='font-size:12px'>Token "+info.token+"</p>"+
+            "<p class='muted' style='font-size:13px;margin-top:6px'>"+(SD.curLang()==="ar"?"اعرض هذا الرمز لضابط الأمن":"Show this code to the gate officer")+"</p></div>",
+          buttons:[{label:SD.t("close"),class:"btn-primary"}]});
+      };
+    });
+  }
+  function now(){return new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});}
+
+  document.getElementById("switchProfile").onclick=()=>{
+    pIdx=(pIdx+1)%PROFILES.length;render();
+    SD.toast((SD.curLang()==="ar"?"تم التبديل إلى ":"Switched to ")+actor().name+" ("+SD.t(actor().role==="coparent"?"coparent":"parent")+")","");
+  };
+
+  document.addEventListener("langchange",()=>render());
+  document.addEventListener("sdsync",()=>render());
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(()=>{render();},0));
+})();
+</script>
+</body>
+</html>
