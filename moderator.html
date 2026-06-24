@@ -95,7 +95,7 @@
         <button class="btn btn-ghost" id="exportCsv" style="margin-inline-start:8px" data-i18n="export_csv"></button>
       </div>
       <div style="overflow:auto">
-        <table class="table"><thead><tr>
+        <table class="table table-responsive"><thead><tr>
           <th data-i18n="time"></th><th>Actor</th><th>Event</th><th data-i18n="status"></th>
         </tr></thead><tbody id="auditBody"></tbody></table>
       </div>
@@ -225,7 +225,7 @@
       return (a.time+" "+a.actor+" "+a.event_en+" "+a.event_ar+" "+a.type).toLowerCase().indexOf(qq)>-1;
     }).forEach(a=>{
       const tr=document.createElement("tr");
-      tr.innerHTML="<td>"+a.time+"</td><td>"+a.actor+"</td><td>"+(SD.curLang()==="ar"?a.event_ar:a.event_en)+"</td><td>"+SD.statusBadge(a.type==="info"?"inqueue":a.type)+"</td>";
+      tr.innerHTML="<td data-label='"+SD.t("time")+"'>"+a.time+"</td><td data-label='Actor'>"+a.actor+"</td><td data-label='Event'>"+(SD.curLang()==="ar"?a.event_ar:a.event_en)+"</td><td data-label='"+SD.t("status")+"'>"+SD.statusBadge(a.type==="info"?"inqueue":a.type)+"</td>";
       b.appendChild(tr);
     });
   }

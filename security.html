@@ -38,7 +38,7 @@
     <div class="card">
       <div class="card-h" data-i18n="active_queue"></div>
       <div style="overflow:auto">
-        <table class="table"><thead><tr>
+        <table class="table table-responsive"><thead><tr>
           <th data-i18n="student"></th><th data-i18n="parent"></th><th data-i18n="actions"></th>
         </tr></thead><tbody id="queueBody"></tbody></table>
       </div>
@@ -63,9 +63,9 @@
     q.forEach(s=>{
       const tr=document.createElement("tr");tr.dataset.id=s.id;
       const enabled=scanned===s.id;
-      tr.innerHTML="<td><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.grade+"</div></td>"+
-        "<td>"+SD.personName(s.parent)+"</td>"+
-        "<td><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+SD.t("confirm_release")+"</button></td>";
+      tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.grade+"</div></td>"+
+        "<td data-label='"+SD.t("parent")+"'>"+SD.personName(s.parent)+"</td>"+
+        "<td data-label='"+SD.t("actions")+"'><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+SD.t("confirm_release")+"</button></td>";
       const rb=tr.querySelector("[data-rel]");
       if(rb&&enabled)rb.onclick=()=>release(s,tr);
       b.appendChild(tr);

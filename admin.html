@@ -52,7 +52,7 @@
       <span class="badge badge-amber" id="ovCount"></span>
     </div>
     <div style="overflow:auto">
-      <table class="table"><thead><tr>
+      <table class="table table-responsive"><thead><tr>
         <th>ID</th><th data-i18n="student"></th><th data-i18n="method"></th><th data-i18n="time"></th><th data-i18n="status"></th><th data-i18n="actions"></th>
       </tr></thead><tbody id="ovBody"></tbody></table>
     </div>
@@ -129,7 +129,7 @@
       const action=o.status==="pending"
         ? "<button class='btn btn-success' data-act='ap'>"+SD.t("approve")+"</button> <button class='btn btn-ghost' data-act='dn'>"+SD.t("deny")+"</button>"
         : "<span class='muted'>—</span>";
-      tr.innerHTML="<td>"+o.id+"</td><td>"+SD.localizeStudentName(o.student)+"</td><td>"+SD.t(o.from)+" → "+SD.t(o.to)+"</td><td>"+o.time+"</td><td>"+SD.statusBadge(o.status)+"</td><td>"+action+"</td>";
+      tr.innerHTML="<td data-label='ID'>"+o.id+"</td><td data-label='"+SD.t("student")+"'>"+SD.localizeStudentName(o.student)+"</td><td data-label='"+SD.t("method")+"'>"+SD.t(o.from)+" → "+SD.t(o.to)+"</td><td data-label='"+SD.t("time")+"'>"+o.time+"</td><td data-label='"+SD.t("status")+"'>"+SD.statusBadge(o.status)+"</td><td data-label='"+SD.t("actions")+"'>"+action+"</td>";
       const ap=tr.querySelector("[data-act='ap']"),dn=tr.querySelector("[data-act='dn']");
       if(ap)ap.onclick=()=>decideOv(o,true);
       if(dn)dn.onclick=()=>decideOv(o,false);

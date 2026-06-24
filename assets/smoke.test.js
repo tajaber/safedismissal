@@ -266,5 +266,22 @@ console.log("TEST: an override window is open (parent can request override)");
   ok(anyClosed,"the blocked (window-closed) case is still demonstrable");
 }
 
+console.log("TEST: mobile-responsive tables (action buttons reachable)");
+{
+  const w=loadPage("admin.html");
+  const tbl=w.document.querySelector("#ovBody")?w.document.querySelector("#ovBody").closest("table"):null;
+  ok(tbl&&tbl.classList.contains("table-responsive"),"override table is responsive");
+  const actCell=w.document.querySelector("#ovBody td:last-child");
+  ok(actCell&&actCell.getAttribute("data-label")===w.SD.t("actions"),"action cell has a data-label for stacked mobile view");
+  ok(actCell&&actCell.querySelector("[data-act='ap']"),"Approve button is present inside the action cell");
+}
+{
+  const w=loadPage("security.html");
+  const tbl=w.document.querySelector("#queueBody").closest("table");
+  ok(tbl.classList.contains("table-responsive"),"security queue table is responsive");
+  const actCell=w.document.querySelector("#queueBody td:last-child");
+  ok(actCell&&actCell.getAttribute("data-label")===w.SD.t("actions"),"release action cell has a data-label");
+}
+
 console.log("\n"+(fail?("FAILED: "+fail+" / passed "+pass):("ALL "+pass+" RUNTIME TESTS PASSED ✅")));
 process.exit(fail?1:0);
