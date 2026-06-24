@@ -12,7 +12,7 @@
 
 <main id="main" class="container section">
   <h1 class="page-title" data-i18n="admin_dash"></h1>
-  <p class="page-sub">Al-Noor International School · Dismissal 14:30</p>
+  <p class="page-sub"><span data-i18n="school_name"></span> · <span data-i18n="school_city"></span></p>
 
   <div class="grid grid-2">
     <!-- First-login approvals -->
@@ -72,7 +72,7 @@
       const row=document.createElement("div");
       row.className="card pad";row.style.marginBottom="10px";
       row.style.display="flex";row.style.alignItems="center";row.style.gap="10px";
-      row.innerHTML="<div style='flex:1'><strong>"+f.parent+"</strong><div class='muted' style='font-size:13px'>"+f.kid+" · "+f.time+"</div></div>";
+      row.innerHTML="<div style='flex:1'><strong>"+SD.personName(f.parent)+"</strong><div class='muted' style='font-size:13px'>"+SD.localizeStudentName(f.kid)+" · "+f.time+"</div></div>";
       const ok=document.createElement("button");ok.className="btn btn-success";ok.textContent=SD.t("approve");
       const no=document.createElement("button");no.className="btn btn-ghost";no.textContent=SD.t("deny");
       ok.onclick=()=>{decide(f,true);};no.onclick=()=>{decide(f,false);};
@@ -129,7 +129,7 @@
       const action=o.status==="pending"
         ? "<button class='btn btn-success' data-act='ap'>"+SD.t("approve")+"</button> <button class='btn btn-ghost' data-act='dn'>"+SD.t("deny")+"</button>"
         : "<span class='muted'>—</span>";
-      tr.innerHTML="<td>"+o.id+"</td><td>"+o.student+"</td><td>"+SD.t(o.from)+" → "+SD.t(o.to)+"</td><td>"+o.time+"</td><td>"+SD.statusBadge(o.status)+"</td><td>"+action+"</td>";
+      tr.innerHTML="<td>"+o.id+"</td><td>"+SD.localizeStudentName(o.student)+"</td><td>"+SD.t(o.from)+" → "+SD.t(o.to)+"</td><td>"+o.time+"</td><td>"+SD.statusBadge(o.status)+"</td><td>"+action+"</td>";
       const ap=tr.querySelector("[data-act='ap']"),dn=tr.querySelector("[data-act='dn']");
       if(ap)ap.onclick=()=>decideOv(o,true);
       if(dn)dn.onclick=()=>decideOv(o,false);
@@ -150,9 +150,9 @@
     SD.save();renderOverrides();
     if(approved){
       SD.notify("Override "+o.id+" approved for "+o.student+" — a day-scoped pickup QR is now available"+(st.securityRequired?" and routed to gate security":""),
-        "تم اعتماد الاستثناء "+o.id+" لـ "+o.student+" — أصبح رمز الاستلام اليومي متاحًا"+(st.securityRequired?" وأُرسل لأمن البوابة":""),"success");
+        "تم اعتماد الاستثناء "+o.id+" لـ "+SD.localizeStudentName(o.student)+" — أصبح رمز الاستلام اليومي متاحًا"+(st.securityRequired?" وأُرسل لأمن البوابة":""),"success");
     }else{
-      SD.notify("Override "+o.id+" denied — "+o.student+"'s parent notified","تم رفض الاستثناء "+o.id+" — تم إخطار ولي أمر "+o.student,"warn");
+      SD.notify("Override "+o.id+" denied — "+o.student+"'s parent notified","تم رفض الاستثناء "+o.id+" — تم إخطار ولي أمر "+SD.localizeStudentName(o.student),"warn");
     }
   }
 

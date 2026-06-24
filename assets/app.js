@@ -44,7 +44,7 @@
     password:{en:"Password",ar:"كلمة المرور"},
     continue:{en:"Continue",ar:"متابعة"},
     mfa_title:{en:"Two-Factor Verification",ar:"التحقق بخطوتين"},
-    mfa_sub:{en:"Enter the 6-digit code sent to your phone ending •• 87",ar:"أدخل الرمز المكوّن من 6 أرقام المُرسل إلى هاتفك المنتهي بـ ٨٧"},
+    mfa_sub:{en:"Enter the 6-digit code sent to your phone ending •• 33",ar:"أدخل الرمز المكوّن من 6 أرقام المُرسل إلى هاتفك المنتهي بـ ٣٣"},
     verify:{en:"Verify & Continue",ar:"تحقق وتابع"},
     resend_code:{en:"Resend code",ar:"إعادة إرسال الرمز"},
     demo_hint:{en:"Demo: any code works",ar:"عرض: أي رمز يعمل"},
@@ -93,7 +93,7 @@
     show_qr:{en:"Show Pickup QR",ar:"عرض رمز الاستلام"},
     accept_terms:{en:"I accept the school's Terms & Conditions",ar:"أوافق على شروط وأحكام المدرسة"},
     accept_invite:{en:"Accept Invitation",ar:"قبول الدعوة"},
-    override_blocked:{en:"Override window closed. Please phone the school: +966 11 555 0123",ar:"انتهى وقت طلب الاستثناء. يرجى الاتصال بالمدرسة: ٠١٢٣ ٥٥٥ ١١ ٩٦٦+"},
+    override_blocked:{en:"Override window closed. Please phone the school: 0791234567",ar:"انتهى وقت طلب الاستثناء. يرجى الاتصال بالمدرسة: 0791234567"},
     override_sent:{en:"Override request sent to the school for approval.",ar:"تم إرسال طلب الاستثناء إلى المدرسة للموافقة."},
     coparent:{en:"Co-Parent",ar:"الشريك"},
 
@@ -155,7 +155,15 @@
     student_name:{en:"Student name",ar:"اسم الطالب"},
     student_id:{en:"Student ID",ar:"رقم الطالب"},
     dismissal_level:{en:"Dismissal level",ar:"مرحلة الانصراف"},
-    remove:{en:"Remove",ar:"إزالة"}
+    remove:{en:"Remove",ar:"إزالة"},
+    school_name:{en:"Fareed Star Academy School",ar:"مدرسة فريد ستار الأكاديمية"},
+    school_city:{en:"Amman, Jordan",ar:"عمّان، الأردن"},
+    school_phone:{en:"0791234567",ar:"0791234567"},
+    label_phone:{en:"Phone",ar:"الهاتف"},
+    label_city:{en:"City",ar:"المدينة"},
+    label_address:{en:"Address",ar:"العنوان"},
+    label_school:{en:"School name",ar:"اسم المدرسة"},
+    onboard_terms_note:{en:"By continuing you accept the school's Terms & Conditions, QR usage policy, and dismissal rules.",ar:"بالمتابعة فإنك توافق على شروط وأحكام المدرسة وسياسة استخدام رمز QR وقواعد الانصراف."}
   };
 
   /* ---------------- mock data ---------------- */
@@ -169,32 +177,34 @@
       {id:"upper",name_en:"Grades 4–6",name_ar:"الصفوف ٤–٦",dismissal:"14:30"}
     ],
     students:[
-      {id:"S-1042",name_en:"Layla Al-Harbi",name_ar:"ليلى الحربي",grade:"KG2",method:"bus2",parent:"Noura Al-Harbi",status:"waiting"},
-      {id:"S-1043",name_en:"Yousef Al-Harbi",name_ar:"يوسف الحربي",grade:"5-B",method:"car",parent:"Noura Al-Harbi",status:"waiting"},
-      {id:"S-1077",name_en:"Sara Mansour",name_ar:"سارة منصور",grade:"1-C",method:"bus1a",parent:"Ahmed Mansour",status:"waiting"},
-      {id:"S-1099",name_en:"Omar Khalid",name_ar:"عمر خالد",grade:"4-A",method:"car",parent:"Khalid Saleh",status:"inqueue"},
-      {id:"S-1120",name_en:"Hana Tariq",name_ar:"هناء طارق",grade:"KG1",method:"car",parent:"Tariq Aziz",status:"inqueue"}
+      {id:"S-2001",name_en:"Bisan Jaber",name_ar:"بيسان جابر",grade:"KG1",method:"car",parent:"Tariq Jaber",phone:"0790112233",status:"waiting"},
+      {id:"S-2002",name_en:"Razan Jaber",name_ar:"رزان جابر",grade:"2-A",method:"bus2",parent:"Tariq Jaber",phone:"0790112233",status:"waiting"},
+      {id:"S-2003",name_en:"Majed Jaber",name_ar:"ماجد جابر",grade:"5-B",method:"car",parent:"Tariq Jaber",phone:"0790112233",status:"inqueue"},
+      {id:"S-2004",name_en:"Saad Jaber",name_ar:"سعد جابر",grade:"3-C",method:"bus1a",parent:"Tariq Jaber",phone:"0790112233",status:"waiting"},
+      {id:"S-2005",name_en:"Mesk Yousef",name_ar:"مسك يوسف",grade:"KG2",method:"car",parent:"Fadi Yousef",phone:"0790332211",status:"inqueue"},
+      {id:"S-2006",name_en:"Wesam Yousef",name_ar:"وسام يوسف",grade:"4-A",method:"bus2",parent:"Fadi Yousef",phone:"0790332211",status:"waiting"},
+      {id:"S-2007",name_en:"Ismael Yousef",name_ar:"إسماعيل يوسف",grade:"1-B",method:"car",parent:"Fadi Yousef",phone:"0790332211",status:"waiting"}
     ],
     overrides:[
-      {id:"OV-301",student:"Sara Mansour",from:"bus1a",to:"car",status:"pending",time:"01:48 PM"}
+      {id:"OV-301",student:"Razan Jaber",from:"bus2",to:"car",status:"pending",time:"01:48 PM"}
     ],
     firstLogins:[
-      {id:"FL-9",parent:"Tariq Aziz",kid:"Hana Tariq",time:"Today 12:10 PM"},
-      {id:"FL-10",parent:"Khalid Saleh",kid:"Omar Khalid",time:"Today 12:32 PM"}
+      {id:"FL-9",parent:"Fadi Yousef",kid:"Mesk Yousef",time:"Today 12:10 PM"},
+      {id:"FL-10",parent:"Tariq Jaber",kid:"Saad Jaber",time:"Today 12:32 PM"}
     ],
     audit:[
-      {time:"01:31 PM",actor:"Security · Gate 2",event_en:"Released Omar Khalid (QR verified)",event_ar:"تم تسليم عمر خالد (تم التحقق من QR)",type:"released"},
+      {time:"01:31 PM",actor:"Security · Gate 2",event_en:"Released Majed Jaber (QR verified)",event_ar:"تم تسليم ماجد جابر (تم التحقق من QR)",type:"released"},
       {time:"01:28 PM",actor:"Admin · Reem",event_en:"Approved override OV-298 (bus→car)",event_ar:"اعتماد استثناء OV-298 (حافلة→سيارة)",type:"approved"},
-      {time:"01:15 PM",actor:"Parent · Noura",event_en:"Announced arrival for Yousef Al-Harbi",event_ar:"إعلان وصول ليوسف الحربي",type:"info"},
-      {time:"12:32 PM",actor:"System",event_en:"First-login request from Khalid Saleh",event_ar:"طلب أول دخول من خالد صالح",type:"pending"}
+      {time:"01:15 PM",actor:"Parent · Tariq Jaber",event_en:"Announced arrival for Majed Jaber",event_ar:"إعلان وصول لماجد جابر",type:"info"},
+      {time:"12:32 PM",actor:"System",event_en:"First-login request from Fadi Yousef",event_ar:"طلب أول دخول من فادي يوسف",type:"pending"}
     ],
     notifications:[
-      {id:"N-1",time:"01:31 PM",text_en:"Omar Khalid released at Gate 2",text_ar:"تم تسليم عمر خالد عند البوابة 2",type:"success",read:false},
+      {id:"N-1",time:"01:31 PM",text_en:"Majed Jaber released at Gate 2",text_ar:"تم تسليم ماجد جابر عند البوابة 2",type:"success",read:false},
       {id:"N-2",time:"12:32 PM",text_en:"New first-login request awaiting approval",text_ar:"طلب أول دخول جديد بانتظار الاعتماد",type:"warn",read:false}
     ]
   };
 
-  const KEY="safedismiss_state_v2";
+  const KEY="safedismiss_state_v3";
   function load(){
     try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.students){if(!s.notifications)s.notifications=[];if(!s.gradeBands)s.gradeBands=JSON.parse(JSON.stringify(DEFAULT_STATE.gradeBands));return s;}}catch(e){}
     return JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -248,6 +258,18 @@
     return bands.find(b=>b.id===id)||bands[bands.length-1]||{id:"upper",name_en:"Grades 4–6",name_ar:"الصفوف ٤–٦",dismissal:"14:30"};
   }
   function bandName(band){return curLang()==="ar"?band.name_ar:band.name_en;}
+  /* Arabic display names for people (parents). Falls back to the given name. */
+  const PEOPLE_AR={
+    "Tariq Jaber":"طارق جابر",
+    "Fadi Yousef":"فادي يوسف"
+  };
+  function personName(n){return curLang()==="ar"?(PEOPLE_AR[n]||n):n;}
+  /* Localize a student name given its English form (used where only the en name is stored). */
+  function localizeStudentName(enName){
+    if(curLang()!=="ar")return enName;
+    const s=(STATE.students||[]).find(x=>x.name_en===enName);
+    return s?s.name_ar:enName;
+  }
   function timeToDate(hhmm,base){
     const d=base?new Date(base):new Date();const p=String(hhmm||"14:30").split(":");
     d.setHours(parseInt(p[0]||"14",10),parseInt(p[1]||"30",10),0,0);return d;
@@ -405,6 +427,7 @@
     t,setLang,curLang,applyI18n,toast,modal,qrSvg,buildChrome,statusBadge,notify,nowTime,renderBell,
     dateStr,dayToken,pickupInfo,
     gradeBands,bandForGrade,bandName,overrideInfoFor,timeToDate,fmtTime,
+    personName,localizeStudentName,
     state:()=>STATE,
     save:()=>save(STATE),
     reset:()=>{STATE=JSON.parse(JSON.stringify(DEFAULT_STATE));save(STATE);},

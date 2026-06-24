@@ -12,7 +12,7 @@
 
 <main id="main" class="container section">
   <h1 class="page-title" data-i18n="mod_dash"></h1>
-  <p class="page-sub">Al-Noor International School · Riyadh</p>
+  <p class="page-sub"><span data-i18n="school_name"></span> · <span data-i18n="school_city"></span></p>
 
   <div class="tabs" id="tabs">
     <div class="tab active" data-tab="overview" data-i18n="tab_overview"></div>
@@ -48,9 +48,10 @@
   <section data-pane="register" class="hidden">
     <div class="card pad">
       <div class="grid grid-2">
-        <div class="field"><label>School name</label><input class="input" value="Al-Noor International School"></div>
-        <div class="field"><label>City</label><input class="input" value="Riyadh"></div>
-        <div class="field"><label>Address</label><input class="input" value="King Fahd Rd, Al-Olaya"></div>
+        <div class="field"><label data-i18n="label_school"></label><input class="input" id="schoolName" value="Fareed Star Academy School"></div>
+        <div class="field"><label data-i18n="label_city"></label><input class="input" id="schoolCity" value="Amman, Jordan"></div>
+        <div class="field"><label data-i18n="label_phone"></label><input class="input" id="schoolPhone" value="0791234567"></div>
+        <div class="field"><label data-i18n="label_address"></label><input class="input" id="schoolAddr" value="Amman, Jordan"></div>
       </div>
       <h4 style="margin:6px 0 4px" data-i18n="dismissal_frames"></h4>
       <p class="muted" style="font-size:13px;margin-top:0" data-i18n="frames_help"></p>
@@ -64,9 +65,9 @@
     <div class="card pad">
       <h3 style="margin-top:0" data-i18n="invite_partner"></h3>
       <div class="grid grid-2">
-        <div class="field"><label data-i18n="parent_phone"></label><input class="input" placeholder="+966 5x xxx xxxx"></div>
+        <div class="field"><label data-i18n="parent_phone"></label><input class="input" placeholder="07xxxxxxxx"></div>
         <div class="field"><label data-i18n="parent_email"></label><input class="input" type="email"></div>
-        <div class="field"><label data-i18n="coparent_phone"></label><input class="input" placeholder="+966 5x xxx xxxx"></div>
+        <div class="field"><label data-i18n="coparent_phone"></label><input class="input" placeholder="07xxxxxxxx"></div>
         <div class="field"><label data-i18n="coparent_email"></label><input class="input" type="email"></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin:6px 0">
@@ -167,7 +168,7 @@
     const div=document.createElement("div");div.className="card pad";div.style.cssText="margin-bottom:10px;background:var(--navy-50)";div.dataset.kid=id;
     div.innerHTML=
       "<div class='grid grid-3'>"+
-        "<div class='field' style='margin:0'><label>"+SD.t("student_name")+"</label><input class='input k-name' placeholder='"+(SD.curLang()==="ar"?"اسم الطالب":"e.g. Layla Al-Harbi")+"' value='"+((prefill&&prefill.name)||"")+"'></div>"+
+        "<div class='field' style='margin:0'><label>"+SD.t("student_name")+"</label><input class='input k-name' placeholder='"+(SD.curLang()==="ar"?"مثال: بيسان جابر":"e.g. Bisan Jaber")+"' value='"+((prefill&&prefill.name)||"")+"'></div>"+
         "<div class='field' style='margin:0'><label>"+SD.t("student_id")+"</label><input class='input k-id' placeholder='S-1xxx' value='"+((prefill&&prefill.id)||"")+"'></div>"+
         "<div class='field' style='margin:0'><label>"+SD.t("dismissal_level")+"</label><select class='k-band'>"+bandOptions((prefill&&prefill.band)||"")+"</select></div>"+
       "</div>"+
@@ -237,7 +238,11 @@
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="safedismiss-audit.csv";a.click();
     SD.toast("Audit log exported ("+rows.length+" rows)","success");
   }
-  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();}
+  function setSchoolFields(){
+    const map={schoolName:"school_name",schoolCity:"school_city",schoolPhone:"school_phone",schoolAddr:"school_city"};
+    Object.keys(map).forEach(id=>{const el=document.getElementById(id);if(el)el.value=SD.t(map[id]);});
+  }
+  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();setSchoolFields();}
   const af=document.getElementById("auditFilter");if(af)af.oninput=renderAudit;
   const ec=document.getElementById("exportCsv");if(ec)ec.onclick=exportCsv;
   addKidRow();

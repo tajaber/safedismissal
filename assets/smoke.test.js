@@ -68,9 +68,9 @@ console.log("TEST: parent flow");
   ok(!w.document.getElementById("enter").disabled,"enter enabled after agree");
   w.document.getElementById("enter").click();
   ok(!w.document.getElementById("app").classList.contains("hidden"),"app visible after accept");
-  // kids rendered (Noura has 2)
+  // kids rendered (Tariq Jaber has 4)
   const kidCards=w.document.querySelectorAll("#kids > .card");
-  ok(kidCards.length===2,"two kids rendered for Noura, got "+kidCards.length);
+  ok(kidCards.length===4,"four kids rendered for Tariq Jaber, got "+kidCards.length);
   // announce on car kid
   const ann=w.document.querySelector("[data-announce]");
   ok(!!ann,"announce button present");
@@ -99,7 +99,7 @@ console.log("TEST: dynamic day-scoped pickup QR");
   const w=loadPage("parent.html");
   const st=w.SD.state();
   const carKid=st.students.find(s=>s.method==="car");
-  const busKid=st.students.find(s=>s.method==="bus2");
+  const busKid=st.students.find(s=>s.method==="bus2"&&!st.overrides.some(o=>o.student===s.name_en)&&s.status!=="inqueue");
   const infoCar=w.SD.pickupInfo(carKid);
   ok(infoCar.eligible,"car kid gets a pickup QR");
   ok(infoCar.payload.indexOf(w.SD.dateStr())>-1,"payload embeds today's date");
@@ -136,10 +136,10 @@ console.log("TEST: iteration-2 features (notifications, co-parent, search)");
 {
   const w=loadPage("security.html");
   // search filters by parent name
-  w.document.getElementById("phoneSearch").value="Khalid";
+  w.document.getElementById("phoneSearch").value="Jaber";
   w.document.getElementById("searchBtn").click();
   const res=w.document.getElementById("searchResult").textContent;
-  ok(res.indexOf("Khalid")>-1,"phone/name search filters the active queue");
+  ok(res.indexOf("Jaber")>-1,"phone/name search filters the active queue");
   // non-matching query yields no match
   w.document.getElementById("phoneSearch").value="zzzzz";
   w.document.getElementById("searchBtn").click();
@@ -189,9 +189,9 @@ console.log("TEST: grade bands & per-kid override windows");
   const oKg=w.SD.overrideInfoFor(kgKid),oUp=w.SD.overrideInfoFor(upKid);
   ok(oKg.deadline.getTime()<oUp.deadline.getTime(),"KG override cutoff is earlier than upper-grade cutoff");
   ok(oKg.mins===(st.overrideDeadlineMin||30),"override minutes come from school setting");
-  // Noura has kids across different levels
-  const noura=st.students.filter(s=>s.parent==="Noura Al-Harbi");
-  const levels=new Set(noura.map(s=>w.SD.bandForGrade(s.grade).id));
+  // Tariq Jaber has kids across different levels
+  const fam=st.students.filter(s=>s.parent==="Tariq Jaber");
+  const levels=new Set(fam.map(s=>w.SD.bandForGrade(s.grade).id));
   ok(levels.size>=2,"parent has children in different dismissal levels ("+[...levels].join(",")+")");
 }
 
@@ -226,6 +226,29 @@ console.log("TEST: admin editable dismissal time frames");
   ok(inputs.length===w.SD.gradeBands().length,"one editable dismissal time per band");
   inputs[0].value="11:15";inputs[0].dispatchEvent(new w.Event("change"));
   ok(w.SD.gradeBands()[0].dismissal==="11:15","editing a band updates its dismissal time in state");
+}
+
+console.log("TEST: updated school/parents/kids data + Arabic");
+{
+  const w=loadPage("index.html");
+  // school name bilingual
+  ok(w.SD.t("school_name")==="Fareed Star Academy School","school name EN");
+  w.SD.setLang("ar");
+  ok(w.SD.t("school_name").indexOf("فريد ستار")>-1,"school name AR");
+  ok(w.SD.personName("Tariq Jaber").indexOf("طارق")>-1,"parent name localizes to Arabic");
+  w.SD.setLang("en");
+  const st=w.SD.state();
+  // two families with the expected kids
+  const jaber=st.students.filter(s=>s.parent==="Tariq Jaber").map(s=>s.name_en);
+  const yousef=st.students.filter(s=>s.parent==="Fadi Yousef").map(s=>s.name_en);
+  ok(jaber.length===4 && jaber.indexOf("Bisan Jaber")>-1 && jaber.indexOf("Saad Jaber")>-1,"Tariq Jaber has 4 kids incl Bisan & Saad");
+  ok(yousef.length===3 && yousef.indexOf("Mesk Yousef")>-1 && yousef.indexOf("Ismael Yousef")>-1,"Fadi Yousef has 3 kids incl Mesk & Ismael");
+  // every kid has Arabic name + phone
+  ok(st.students.every(s=>s.name_ar && s.phone),"every student has an Arabic name and a phone");
+  // phone matches the parent
+  ok(st.students.filter(s=>s.parent==="Tariq Jaber").every(s=>s.phone==="0790112233"),"Jaber kids carry Tariq's phone");
+  // override-blocked message uses the new school phone
+  ok(w.SD.t("override_blocked").indexOf("0791234567")>-1,"override-blocked message shows new school phone");
 }
 
 console.log("\n"+(fail?("FAILED: "+fail+" / passed "+pass):("ALL "+pass+" RUNTIME TESTS PASSED ✅")));

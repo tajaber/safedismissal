@@ -16,9 +16,9 @@
     <div class="screen center">
       <div style="font-size:34px">👪</div>
       <h2 style="margin:6px 0" data-i18n="accept_invite"></h2>
-      <p class="muted" style="font-size:14px">Noura Al-Harbi · Al-Noor International School</p>
+      <p class="muted" style="font-size:14px"><span id="onboardName">Tariq Jaber</span> · <span data-i18n="school_name"></span></p>
       <div class="card pad" style="text-align:start;margin:14px 0">
-        <p class="muted" style="font-size:13px;margin:0">By continuing you accept the school's Terms &amp; Conditions, QR usage policy, and dismissal rules.</p>
+        <p class="muted" style="font-size:13px;margin:0" data-i18n="onboard_terms_note"></p>
       </div>
       <label style="display:flex;gap:10px;align-items:center;text-align:start;margin-bottom:14px">
         <input type="checkbox" id="agree" style="width:20px;height:20px">
@@ -33,7 +33,7 @@
     <div class="screen">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <div style="font-size:26px">👋</div>
-        <div><strong id="profileName">Noura Al-Harbi</strong><div class="muted" style="font-size:13px" id="roleTag"></div></div>
+        <div><strong id="profileName">Tariq Jaber</strong><div class="muted" style="font-size:13px" id="roleTag"></div></div>
         <span class="spacer" style="flex:1"></span>
         <button class="btn btn-ghost" id="switchProfile" style="padding:6px 10px;font-size:13px" data-i18n="switch_profile"></button>
       </div>
@@ -48,8 +48,7 @@
 <script src="assets/app.js"></script>
 <script>
 (function(){
-  const HOUSEHOLD="Noura Al-Harbi";
-  const PROFILES=[{name:"Noura Al-Harbi",role:"parent"},{name:"Saad Al-Harbi",role:"coparent"}];
+  const PROFILES=[{name:"Tariq Jaber",role:"parent"},{name:"Fadi Yousef",role:"parent"}];
   let pIdx=0;
   function actor(){return PROFILES[pIdx];}
 
@@ -73,9 +72,10 @@
 
   function render(){
     const a=actor();
-    document.getElementById("profileName").textContent=a.name;
-    document.getElementById("roleTag").textContent=SD.t(a.role==="coparent"?"coparent":"parent");
-    const kids=SD.state().students.filter(s=>s.parent===HOUSEHOLD);
+    document.getElementById("profileName").textContent=SD.personName(a.name);
+    document.getElementById("roleTag").textContent=SD.t("parent");
+    const on=document.getElementById("onboardName");if(on)on.textContent=SD.personName(PROFILES[0].name);
+    const kids=SD.state().students.filter(s=>s.parent===a.name);
     const wrap=document.getElementById("kids");wrap.innerHTML="";
     kids.forEach(s=>{
       const c=document.createElement("div");c.className="card pad";c.style.marginBottom="14px";
@@ -124,7 +124,7 @@
         s.status="inqueue";SD.save();
         document.querySelector("[data-lane='"+id+"']").classList.remove("hidden");
         SD.notify(actor().name+" announced arrival for "+s.name_en+" — please pull into Lane A",
-          actor().name+" أعلن وصول "+s.name_ar+" — تقدّم إلى المسار A","success");
+          SD.personName(actor().name)+" أعلن وصول "+s.name_ar+" — تقدّم إلى المسار A","success");
         SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Co-Parent · ":"Parent · ")+actor().name,
           event_en:"Announced arrival for "+s.name_en,event_ar:"إعلان وصول لـ "+s.name_ar,type:"info"});
         SD.save();
@@ -144,7 +144,7 @@
               const exists=SD.state().overrides.find(o=>o.student===s.name_en&&o.status==="pending");
               if(!exists){SD.state().overrides.push({id:"OV-"+Math.floor(Math.random()*900+100),student:s.name_en,from:s.method,to:"car",status:"pending",time:now(),date:SD.dateStr()});}
               SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Co-Parent · ":"Parent · ")+actor().name,event_en:"Requested car override for "+s.name_en,event_ar:"طلب استثناء بالسيارة لـ "+s.name_ar,type:"pending"});
-              SD.save();SD.notify("Car override requested for "+s.name_en+" by "+actor().name+" — awaiting school approval","طلب استثناء بالسيارة لـ "+s.name_ar+" بواسطة "+actor().name+" — بانتظار موافقة المدرسة","");
+              SD.save();SD.notify("Car override requested for "+s.name_en+" by "+actor().name+" — awaiting school approval","طلب استثناء بالسيارة لـ "+s.name_ar+" بواسطة "+SD.personName(actor().name)+" — بانتظار موافقة المدرسة","");
             }}
           ]});
       };
@@ -177,7 +177,7 @@
 
   document.getElementById("switchProfile").onclick=()=>{
     pIdx=(pIdx+1)%PROFILES.length;render();
-    SD.toast((SD.curLang()==="ar"?"تم التبديل إلى ":"Switched to ")+actor().name+" ("+SD.t(actor().role==="coparent"?"coparent":"parent")+")","");
+    SD.toast((SD.curLang()==="ar"?"تم التبديل إلى ":"Switched to ")+SD.personName(actor().name)+" ("+SD.t("parent")+")","");
   };
 
   document.addEventListener("langchange",()=>render());

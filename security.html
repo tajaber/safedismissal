@@ -27,7 +27,7 @@
       <div style="text-align:start">
         <label style="font-weight:600;font-size:14px" data-i18n="search_phone"></label>
         <div style="display:flex;gap:8px;margin-top:6px">
-          <input class="input" id="phoneSearch" placeholder="+966 5x xxx xxxx">
+          <input class="input" id="phoneSearch" placeholder="07xxxxxxxx">
           <button class="btn btn-ghost" id="searchBtn" data-i18n="search"></button>
         </div>
         <div id="searchResult"></div>
@@ -64,7 +64,7 @@
       const tr=document.createElement("tr");tr.dataset.id=s.id;
       const enabled=scanned===s.id;
       tr.innerHTML="<td><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.grade+"</div></td>"+
-        "<td>"+s.parent+"</td>"+
+        "<td>"+SD.personName(s.parent)+"</td>"+
         "<td><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+SD.t("confirm_release")+"</button></td>";
       const rb=tr.querySelector("[data-rel]");
       if(rb&&enabled)rb.onclick=()=>release(s,tr);
@@ -100,7 +100,7 @@
       const res=document.getElementById("scanResult");
       res.classList.remove("hidden");
       const refTxt=info.eligible?("<br><span class='badge badge-green'>"+SD.t("scan_ref")+": "+info.ref+"</span><br><span class='muted' style='font-size:12px'>"+SD.t("qr_valid_today")+" · Token "+info.token+"</span>"):("<br><span class='badge badge-red'>"+SD.t("qr_need_override")+"</span>");
-      res.innerHTML="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br><span class='muted'>"+SD.t("parent")+": "+s.parent+"</span><br>"+SD.statusBadge("inqueue")+refTxt;
+      res.innerHTML="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br><span class='muted'>"+SD.t("parent")+": "+SD.personName(s.parent)+"</span><br>"+SD.statusBadge("inqueue")+refTxt;
       if(!info.eligible){scanned=null;SD.toast("Pickup QR invalid for today — verify approval","danger");renderQueue();return;}
       renderQueue();
       SD.toast("QR matched: "+SD.studentName(s)+" ("+info.ref+") — release enabled","success");
@@ -113,15 +113,15 @@
     const q=queue();
     const matches=!v?q:q.filter(s=>
       s.parent.toLowerCase().indexOf(v)>-1 ||
+      (s.name_ar||"").indexOf(v)>-1 ||
       SD.studentName(s).toLowerCase().indexOf(v)>-1 ||
-      ("+96650"+ (s.id.replace(/\D/g,"")) ).indexOf(v.replace(/\s/g,""))>-1 ||
-      "4587".indexOf(v.replace(/\D/g,""))>-1 && v.replace(/\D/g,"").length>=3
+      ((s.phone||"").indexOf(v.replace(/\s/g,""))>-1 && v.replace(/\D/g,"").length>=3)
     );
     if(!matches.length){r.innerHTML="<p class='muted' style='margin-top:10px'>"+(SD.curLang()==="ar"?"لا نتائج مطابقة":"No match in active queue")+"</p>";return;}
     r.innerHTML=matches.map(s=>{
       const info=SD.pickupInfo(s);
-      return "<div class='card pad' style='margin-top:10px'><strong>"+s.parent+"</strong> — "+SD.studentName(s)+
-      "<div class='muted' style='font-size:13px'>"+(s.grade)+" · "+(info.eligible?(SD.t("scan_ref")+": "+info.ref):"—")+"</div>"+
+      return "<div class='card pad' style='margin-top:10px'><strong>"+SD.personName(s.parent)+"</strong> — "+SD.studentName(s)+
+      "<div class='muted' style='font-size:13px'>"+(s.phone||"")+" · "+(s.grade)+" · "+(info.eligible?(SD.t("scan_ref")+": "+info.ref):"—")+"</div>"+
       "<button class='btn btn-success' style='margin-top:8px' data-vid='"+s.id+"'>"+SD.t("verify_identity")+"</button></div>";
     }).join("");
     r.querySelectorAll("[data-vid]").forEach(b=>{
