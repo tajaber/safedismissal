@@ -204,13 +204,38 @@
     ]
   };
 
-  const KEY="safedismiss_state_v3";
+  const KEY="safedismiss_state_v4";
   function load(){
     try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.students){if(!s.notifications)s.notifications=[];if(!s.gradeBands)s.gradeBands=JSON.parse(JSON.stringify(DEFAULT_STATE.gradeBands));return s;}}catch(e){}
     return JSON.parse(JSON.stringify(DEFAULT_STATE));
   }
   function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
   let STATE=load();
+
+  /* Demo aid: dismissal times are real clock times, so once the day's cutoff passes
+     every override looks "closed". To keep the prototype demoable at any time, if NO
+     grade band still has an open override window we re-seed the band dismissal times
+     relative to the current clock — keeping the youngest band just past its cutoff
+     (so the "window closed → phone the school" case still shows) and the older bands
+     open (so a parent can actually request an override). */
+  function reseedDismissalTimes(){
+    const offsets={kg:-20,lower:90,upper:150}; // minutes from now
+    (STATE.gradeBands||[]).forEach((b,i)=>{
+      const off=(b.id in offsets)?offsets[b.id]:(60+i*60);
+      const d=new Date(Date.now()+off*60000);
+      d.setMinutes(Math.round(d.getMinutes()/5)*5,0,0);
+      b.dismissal=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+    });
+  }
+  function anyOverrideWindowOpen(){
+    const mins=STATE.overrideDeadlineMin||30;
+    return (STATE.gradeBands||[]).some(b=>{
+      const p=String(b.dismissal||"14:30").split(":");
+      const d=new Date();d.setHours((+p[0]||14),(+p[1]||30),0,0);
+      return (d.getTime()-mins*60000)-Date.now()>0;
+    });
+  }
+  if(!anyOverrideWindowOpen()){reseedDismissalTimes();save(STATE);}
 
   /* ---------------- i18n core ---------------- */
   function curLang(){return STATE.lang||"en";}

@@ -251,5 +251,20 @@ console.log("TEST: updated school/parents/kids data + Arabic");
   ok(w.SD.t("override_blocked").indexOf("0791234567")>-1,"override-blocked message shows new school phone");
 }
 
+console.log("TEST: an override window is open (parent can request override)");
+{
+  const w=loadPage("parent.html");
+  const st=w.SD.state();
+  // demo guarantees at least one band's override window is currently open
+  const openKid=st.students.find(s=>w.SD.overrideInfoFor(s).open);
+  ok(!!openKid,"at least one kid can currently request an override");
+  // Tariq Jaber (the default parent view) has an openable kid
+  const tariqOpen=st.students.filter(s=>s.parent==="Tariq Jaber").some(s=>w.SD.overrideInfoFor(s).open);
+  ok(tariqOpen,"Tariq Jaber has at least one child whose override window is open");
+  // and the youngest band remains closed so the blocked case is still demoable
+  const anyClosed=st.students.some(s=>!w.SD.overrideInfoFor(s).open);
+  ok(anyClosed,"the blocked (window-closed) case is still demonstrable");
+}
+
 console.log("\n"+(fail?("FAILED: "+fail+" / passed "+pass):("ALL "+pass+" RUNTIME TESTS PASSED ✅")));
 process.exit(fail?1:0);
