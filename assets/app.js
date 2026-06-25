@@ -279,6 +279,8 @@
     select_gate:{en:"Select gate",ar:"اختر البوابة"},
     gate_label:{en:"Gate",ar:"البوابة"},
     gate_select_first:{en:"Select the gate to confirm the release.",ar:"اختر البوابة لتأكيد التسليم."},
+    gate_modal_help:{en:"Choose the gate where this child is being released:",ar:"اختر البوابة التي يتم تسليم الطفل عندها:"},
+    confirm_release_hint:{en:"tap Confirm Release, then pick the gate",ar:"اضغط تأكيد التسليم، ثم اختر البوابة"},
     released_at_gate:{en:"Released at",ar:"تم التسليم عند"},
 
     /* guardian override button states */

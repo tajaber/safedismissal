@@ -116,7 +116,7 @@
       <button class="btn btn-primary" id="addSecurity" type="button" style="margin-top:4px">＋ <span data-i18n="create_security"></span></button>
       <div style="overflow:auto;margin-top:16px">
         <table class="table table-responsive"><thead><tr>
-          <th data-i18n="security_name"></th><th data-i18n="security_phone"></th><th data-i18n="move_branch"></th>
+          <th data-i18n="security_name"></th><th data-i18n="security_phone"></th><th data-i18n="branch"></th><th data-i18n="move_branch"></th>
         </tr></thead><tbody id="secBody"></tbody></table>
       </div>
     </div>
@@ -393,6 +393,7 @@
       const sel="<select data-sec='"+x.id+"'>"+branchOptions(x.branchId)+"</select>";
       tr.innerHTML="<td data-label='"+SD.t("security_name")+"'><strong>"+SD.securityName(x)+"</strong></td>"+
         "<td data-label='"+SD.t("security_phone")+"'>"+x.phone+"</td>"+
+        "<td data-label='"+SD.t("branch")+"'><span class='badge badge-navy'>"+SD.branchName(x.branchId)+"</span></td>"+
         "<td data-label='"+SD.t("move_branch")+"'>"+sel+"</td>";
       const s=tr.querySelector("select");
       s.onchange=()=>{SD.moveSecurity(x.id,s.value);

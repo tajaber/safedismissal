@@ -501,6 +501,10 @@ console.log("TEST: moderator manages security personnel + branch call center");
   ok(Array.isArray(w.SD.security())&&w.SD.security().length>=2,"state seeds security personnel");
   ok(!!w.document.querySelector("#tabs .tab[data-tab='security']"),"moderator has a Security tab");
   ok(w.document.querySelectorAll("#secBody tr").length===w.SD.security().length,"security table lists all officers");
+  ok(!!w.document.getElementById("secBranch"),"create-security form has an Assigned branch select");
+  // each officer row shows its assigned branch
+  const firstRow=w.document.querySelector("#secBody tr");
+  ok(firstRow&&firstRow.textContent.indexOf(w.SD.branchName(w.SD.security()[0].branchId))>-1,"security row shows the officer's assigned branch");
   // create a security account
   const before=w.SD.security().length;
   w.document.getElementById("secName").value="Omar Said";
