@@ -163,7 +163,7 @@
             {label:SD.t("cancel"),class:"btn-ghost"},
             {label:SD.t("submit"),class:"btn-primary",onClick:()=>{
               const exists=SD.state().overrides.find(o=>o.student===s.name_en&&o.status==="pending");
-              if(!exists){SD.state().overrides.push({id:"OV-"+Math.floor(Math.random()*900+100),student:s.name_en,from:s.method,to:"car",status:"pending",time:now(),date:SD.dateStr(),branch:s.branchId});}
+              if(!exists){SD.state().overrides.push({id:"OV-"+Math.floor(Math.random()*900+100),student:s.name_en,from:s.method,to:"car",status:"pending",time:now(),date:SD.dateStr(),branch:s.branchId,requestor:actor().name,requestorPhone:s.phone||""});}
               const admins=SD.adminsForBranch(s.branchId);
               const adminNames=admins.map(a=>a.name_en).join(", ")||"branch admins";
               const adminNamesAr=admins.map(a=>a.name_ar).join("، ")||"مسؤولي الفرع";

@@ -340,16 +340,36 @@ console.log("TEST: admin invite + move + branch context");
   const w=loadPage("admin.html");
   ok(!!w.document.getElementById("adminSwitch"),"admin context switcher present");
   ok(w.document.getElementById("adminSwitch").options.length===w.SD.admins().length,"switcher lists all admins");
-  // move a student between branches from admin
+  // students tab: search + filters present, default scoped to the admin's branch
+  ok(!!w.document.getElementById("aiStuSearch"),"students tab has a search box");
+  ok(!!w.document.getElementById("aiStuBranch"),"students tab has a branch filter");
+  ok(!!w.document.getElementById("aiStuGrade"),"students tab has a grade filter");
+  const curBr=w.SD.admins()[0].branchId;
+  const defRows=[...w.document.querySelectorAll("#aiStuBody select[data-stu]")].map(s=>s.getAttribute("data-stu"));
+  ok(defRows.length>0&&defRows.every(id=>w.SD.state().students.find(s=>s.id===id).branchId===curBr),"students list is scoped to the admin's own branch by default");
+  // widen to all branches, then move a student with confirmation
+  const brF=w.document.getElementById("aiStuBranch");brF.value="__all";brF.dispatchEvent(new w.Event("change"));
   const sel=w.document.querySelector("#aiStuBody select[data-stu]");
   ok(!!sel,"admin students table has move-branch selects");
   const sid=sel.getAttribute("data-stu");
-  const target=w.SD.branches()[w.SD.branches().length-1].id;
+  const cur=w.SD.state().students.find(s=>s.id===sid).branchId;
+  const target=w.SD.branches().find(b=>b.id!==cur).id;
   sel.value=target;sel.dispatchEvent(new w.Event("change"));
-  ok(w.SD.state().students.find(s=>s.id===sid).branchId===target,"admin can move a student to another branch");
+  const modal=w.document.querySelector(".modal-bg");
+  ok(!!modal,"moving a student prompts a confirmation modal");
+  ok(w.SD.state().students.find(s=>s.id===sid).branchId===cur,"student is NOT moved until confirmed");
+  modal.querySelector(".m-f .btn-primary").click();
+  ok(w.SD.state().students.find(s=>s.id===sid).branchId===target,"confirming moves the student to the new branch");
+  // grade filter narrows the list
+  const grF=w.document.getElementById("aiStuGrade");
+  const someGrade=w.SD.state().students[0].grade;grF.value=someGrade;grF.dispatchEvent(new w.Event("change"));
+  ok([...w.document.querySelectorAll("#aiStuBody select[data-stu]")].every(s=>w.SD.state().students.find(x=>x.id===s.getAttribute("data-stu")).grade===someGrade),"grade filter narrows the student list");
   // override request card shows the kid's branch + school details
   const ovCard=w.document.querySelector("#ovCards .card");
   ok(ovCard&&/📍/.test(ovCard.textContent),"override card shows the kid's branch/location & school details");
+  // override request card shows the requestor (guardian) name + phone
+  ok(ovCard&&ovCard.textContent.indexOf(w.SD.t("requested_by"))>-1,"override card shows a 'Requested by' line");
+  ok(ovCard&&ovCard.textContent.indexOf("Tariq Jaber")>-1&&ovCard.textContent.indexOf("0790112233")>-1,"override card shows the requestor name and phone");
   // admin invite: no guardian-branch selector (auto-derived from each child's branch)
   ok(!w.document.getElementById("aiParentBranch"),"admin invite has NO guardian/parent-branch select (auto from kids)");
   ok(!!w.document.querySelector("#aiKidRows .ak-branch"),"admin invite kid row has a branch select");

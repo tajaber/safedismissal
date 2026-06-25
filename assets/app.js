@@ -249,6 +249,12 @@
     student_moved:{en:"Student moved to",ar:"تم نقل الطالب إلى"},
     students_title:{en:"Students & Branch Assignment",ar:"الطلاب وإسناد الفروع"},
     students_help:{en:"Each student belongs to one branch at a time. Move a student between branches whenever needed.",ar:"ينتمي كل طالب إلى فرع واحد في كل مرة. انقل الطالب بين الفروع متى لزم الأمر."},
+    students_word:{en:"students",ar:"طالب"},
+    search_name:{en:"Search by name, ID, grade…",ar:"ابحث بالاسم أو الرقم أو الصف…"},
+    all_branches:{en:"All branches",ar:"كل الفروع"},
+    all_grades:{en:"All grades",ar:"كل الصفوف"},
+    confirm_move_title:{en:"Move student",ar:"نقل الطالب"},
+    confirm_move_q:{en:"Move {student} from {from} to {to}? This updates the student's branch record.",ar:"نقل {student} من {from} إلى {to}؟ سيؤدي هذا إلى تحديث سجل فرع الطالب."},
     parent_branch:{en:"Guardian/Parent branch",ar:"فرع ولي الأمر1"},
     parent_branch_auto:{en:"The guardian/parent's branch is assigned automatically from each child's branch — no need to pick one here.",ar:"يُسنَد فرع ولي الأمر تلقائيًا من فرع كل طفل — لا حاجة لاختياره هنا."},
     no_students:{en:"No students yet",ar:"لا يوجد طلاب بعد"},
@@ -267,6 +273,7 @@
     no_override_requests:{en:"No override requests right now.",ar:"لا توجد طلبات استثناء حاليًا."},
     school_details:{en:"School details",ar:"تفاصيل المدرسة"},
     requested_at:{en:"Requested",ar:"وقت الطلب"},
+    requested_by:{en:"Requested by",ar:"مقدّم الطلب"},
 
     /* classes & teacher */
     nav_teacher:{en:"Teacher",ar:"المعلّم"},
@@ -331,7 +338,7 @@
       {id:"S-2007",name_en:"Ismael Yousef",name_ar:"إسماعيل يوسف",grade:"1-B",method:"car",parent:"Fadi Yousef",phone:"0790332211",branchId:"west",classId:"",status:"waiting"}
     ],
     overrides:[
-      {id:"OV-301",student:"Razan Jaber",from:"bus2",to:"car",status:"pending",time:"01:48 PM"}
+      {id:"OV-301",student:"Razan Jaber",from:"bus2",to:"car",status:"pending",time:"01:48 PM",requestor:"Tariq Jaber",requestorPhone:"0790112233"}
     ],
     firstLogins:[
       {id:"FL-9",parent:"Fadi Yousef",kid:"Mesk Yousef",time:"Today 12:10 PM"},

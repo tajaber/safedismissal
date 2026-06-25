@@ -69,19 +69,24 @@
     </div>
   </section>
 
-  <!-- Students: move between branches -->
+  <!-- Students: list (admin's branch) + search/filter + move between branches -->
   <section data-pane="students" class="hidden">
     <div class="card">
       <div class="card-h">
         <span data-i18n="students_title"></span>
         <span class="spacer" style="flex:1"></span>
-        <input class="input" id="aiStuSearch" style="max-width:200px;padding:8px 10px" data-i18n-ph="search">
+        <span class="badge badge-navy" id="aiStuCount"></span>
       </div>
       <div class="card-b">
         <p class="muted" style="font-size:13px;margin-top:0" data-i18n="students_help"></p>
+        <div class="grid grid-3" style="margin-bottom:14px">
+          <div class="field" style="margin:0"><label data-i18n="search"></label><input class="input" id="aiStuSearch" data-i18n-ph="search_name"></div>
+          <div class="field" style="margin:0"><label data-i18n="branch"></label><select id="aiStuBranch"></select></div>
+          <div class="field" style="margin:0"><label data-i18n="grade"></label><select id="aiStuGrade"></select></div>
+        </div>
         <div style="overflow:auto">
           <table class="table table-responsive"><thead><tr>
-            <th data-i18n="student"></th><th data-i18n="grade"></th><th data-i18n="parent"></th><th data-i18n="move_branch"></th>
+            <th data-i18n="student"></th><th data-i18n="grade"></th><th data-i18n="parent"></th><th data-i18n="branch"></th><th data-i18n="move_branch"></th>
           </tr></thead><tbody id="aiStuBody"></tbody></table>
         </div>
       </div>
@@ -148,7 +153,7 @@
     const cb=document.getElementById("ctxBranch");if(cb)cb.textContent=SD.t("your_branch")+": "+SD.branchName(a.branchId);
     const sw=document.getElementById("adminSwitch");
     if(sw){sw.innerHTML=SD.admins().map(x=>"<option value='"+x.id+"' "+(x.id===adminId?"selected":"")+">"+SD.adminName(x)+" · "+SD.branchName(x.branchId)+"</option>").join("");
-      sw.onchange=()=>{adminId=sw.value;renderContext();};}
+      sw.onchange=()=>{adminId=sw.value;aiStuFiltersInit=false;renderContext();if(typeof renderAiStudents==="function")renderAiStudents();renderOverrides&&renderOverrides();};}
   }
 
   function renderFirst(){
@@ -219,6 +224,10 @@
       const card=document.createElement("div");
       card.className="card pad";card.style.cssText="margin-bottom:12px;background:var(--navy-50)";
       const schoolLine=br?("<div class='muted' style='font-size:13px;margin-top:6px'>🏫 "+SD.t("school_name")+" — <strong>📍 "+SD.branchName(br)+"</strong> · "+br.phone+"</div>"):"";
+      // Requestor (guardian) name + phone — stored on the request, with a fallback to the kid's guardian.
+      const reqName=o.requestor||(stu?stu.parent:"");
+      const reqPhone=o.requestorPhone||(stu?stu.phone:"");
+      const reqLine=reqName?("<div class='muted' style='font-size:13px;margin-top:4px'>👤 "+SD.t("requested_by")+": <strong>"+SD.personName(reqName)+"</strong>"+(reqPhone?(" — "+reqPhone):"")+"</div>"):"";
       const actions=o.status==="pending"
         ? "<button class='btn btn-success' data-act='ap'>"+SD.t("approve")+"</button> <button class='btn btn-ghost' data-act='dn'>"+SD.t("deny")+"</button>"
         : "";
@@ -227,6 +236,7 @@
           "<div style='flex:1;min-width:180px'>"+
             "<div style='display:flex;align-items:center;gap:8px;flex-wrap:wrap'><strong style='font-size:16px'>"+SD.localizeStudentName(o.student)+"</strong> "+SD.statusBadge(o.status)+"</div>"+
             "<div class='muted' style='font-size:13px;margin-top:2px'>"+o.id+" · "+SD.t(o.from)+" → "+SD.t(o.to)+" · "+SD.t("requested_at")+" "+o.time+"</div>"+
+            reqLine+
             schoolLine+
           "</div>"+
           "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+actions+"</div>"+
@@ -299,26 +309,75 @@
     SD.toast((SD.curLang()==="ar"?"تم إرسال الدعوة · الفرع: ":"Invitation sent · branch: ")+brLabel+(n?(" · "+n+" "+SD.t("children")):""),"success");
   };
 
-  /* ---- Admin: move students between branches ---- */
+  /* ---- Admin: list students (default = own branch), search/filter, move w/ confirm ---- */
+  let aiStuFiltersInit=false;
+  function initStuFilters(){
+    const brSel=document.getElementById("aiStuBranch");
+    const grSel=document.getElementById("aiStuGrade");
+    if(brSel){
+      const cur=brSel.value;
+      brSel.innerHTML="<option value='"+curBranch()+"'>"+SD.branchName(curBranch())+"</option>"+
+        SD.branches().filter(b=>b.id!==curBranch()).map(b=>"<option value='"+b.id+"'>"+SD.branchName(b)+"</option>").join("")+
+        "<option value='__all'>"+SD.t("all_branches")+"</option>";
+      brSel.value=(aiStuFiltersInit&&cur)?cur:curBranch();
+    }
+    if(grSel){
+      const cur=grSel.value;
+      const grades=[...new Set(SD.state().students.map(s=>s.grade))].sort();
+      grSel.innerHTML="<option value='__all'>"+SD.t("all_grades")+"</option>"+grades.map(g=>"<option value='"+g+"'>"+g+"</option>").join("");
+      grSel.value=(aiStuFiltersInit&&cur)?cur:"__all";
+    }
+    aiStuFiltersInit=true;
+  }
   function renderAiStudents(){
-    const body=document.getElementById("aiStuBody");if(!body)return;body.innerHTML="";
+    const body=document.getElementById("aiStuBody");if(!body)return;
+    initStuFilters();
+    body.innerHTML="";
     const q=((document.getElementById("aiStuSearch")||{}).value||"").toLowerCase();
-    const list=SD.state().students.filter(s=>!q||(s.name_en+" "+s.name_ar+" "+s.grade+" "+s.parent).toLowerCase().indexOf(q)>-1);
-    if(!list.length){body.innerHTML="<tr><td colspan='4' class='muted'>"+SD.t("no_students")+"</td></tr>";return;}
+    const brFilter=(document.getElementById("aiStuBranch")||{}).value||curBranch();
+    const grFilter=(document.getElementById("aiStuGrade")||{}).value||"__all";
+    const list=SD.state().students.filter(s=>{
+      if(brFilter!=="__all"&&s.branchId!==brFilter)return false;
+      if(grFilter!=="__all"&&s.grade!==grFilter)return false;
+      if(q&&(s.name_en+" "+s.name_ar+" "+s.grade+" "+s.parent+" "+s.id).toLowerCase().indexOf(q)<0)return false;
+      return true;
+    });
+    const cnt=document.getElementById("aiStuCount");if(cnt)cnt.textContent=list.length+" "+SD.t("students_word");
+    if(!list.length){body.innerHTML="<tr><td colspan='5' class='muted'>"+SD.t("no_students")+"</td></tr>";return;}
     list.forEach(s=>{
       const tr=document.createElement("tr");
       tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.id+"</div></td>"+
         "<td data-label='"+SD.t("grade")+"'>"+s.grade+"</td>"+
         "<td data-label='"+SD.t("parent")+"'>"+SD.personName(s.parent)+"</td>"+
+        "<td data-label='"+SD.t("branch")+"'><span class='badge badge-navy'>"+SD.branchName(s.branchId)+"</span></td>"+
         "<td data-label='"+SD.t("move_branch")+"'><select data-stu='"+s.id+"'>"+branchOptions(s.branchId)+"</select></td>";
       const dd=tr.querySelector("select");
-      dd.onchange=()=>{SD.moveStudent(s.id,dd.value);
-        SD.state().audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Moved "+s.name_en+" to "+SD.branchName(dd.value),event_ar:"نقل "+s.name_ar+" إلى "+SD.branchName(dd.value),type:"info"});SD.save();
-        SD.toast(SD.studentName(s)+" → "+SD.branchName(dd.value),"success");};
+      const fromBranch=s.branchId;
+      dd.onchange=()=>{
+        const target=dd.value;
+        if(target===fromBranch)return;
+        SD.modal({title:SD.t("confirm_move_title"),
+          body:"<p>"+SD.t("confirm_move_q")
+                .replace("{student}","<strong>"+SD.studentName(s)+"</strong>")
+                .replace("{from}","<strong>"+SD.branchName(fromBranch)+"</strong>")
+                .replace("{to}","<strong>"+SD.branchName(target)+"</strong>")+"</p>",
+          buttons:[
+            {label:SD.t("cancel"),class:"btn-ghost",onClick:()=>{dd.value=fromBranch;}},
+            {label:SD.t("confirm"),class:"btn-primary",onClick:()=>{
+              SD.moveStudent(s.id,target);
+              SD.state().audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Moved "+s.name_en+" from "+SD.branchName(fromBranch)+" to "+SD.branchName(target),event_ar:"نقل "+s.name_ar+" من "+SD.branchName(fromBranch)+" إلى "+SD.branchName(target),type:"info"});SD.save();
+              SD.toast(SD.studentName(s)+" → "+SD.branchName(target),"success");
+              renderAiStudents();
+            }}
+          ]});
+      };
       body.appendChild(tr);
     });
   }
-  const aiStuSearch=document.getElementById("aiStuSearch");if(aiStuSearch)aiStuSearch.oninput=renderAiStudents;
+  ["aiStuSearch","aiStuBranch","aiStuGrade"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){const ev=(el.tagName==="SELECT")?"change":"input";el.addEventListener(ev,renderAiStudents);}
+  });
 
   document.getElementById("deadline").value=SD.state().overrideDeadlineMin;
   document.getElementById("deadline").onchange=function(){
