@@ -570,27 +570,41 @@ console.log("TEST: classes feature (per-branch toggle, add class, link student)"
   }
 }
 
-console.log("TEST: teacher classroom board shows feed for enabled branches only");
+console.log("TEST: classroom board (branch → class → pickup-relevant students)");
 {
-  const w=loadPage("teacher.html");
-  const enabled=w.SD.classes().filter(c=>w.SD.branchClassesEnabled(c.branchId));
-  const sel=w.document.getElementById("classSelect");
-  ok(sel.options.length===enabled.length,"class selector lists only classes in enabled branches");
-  // classFeed only returns announced/override kids in enabled branches
+  const w=loadPage("classroom.html");
+  // branch selector lists only branches with the classroom feature enabled
+  const enabledBranches=w.SD.branches().filter(b=>w.SD.branchClassesEnabled(b.id));
+  const brSel=w.document.getElementById("branchSelect");
+  ok(brSel.options.length===enabledBranches.length,"branch selector lists only classroom-enabled branches");
+  // selecting a branch lists its classes
+  const branch=enabledBranches[0];
+  brSel.value=branch.id;brSel.dispatchEvent(new w.Event("change"));
+  const clsSel=w.document.getElementById("classSelect");
+  const branchClasses=w.SD.classesForBranch(branch.id);
+  ok(clsSel.options.length===branchClasses.length,"class selector lists the selected branch's classes");
+  // classroomStudents includes car / bus1m / active-override; excludes plain bus2 without override
   const st=w.SD.state();
-  const cls=enabled[0];
-  // make a student in this class "inqueue" (announced)
+  const cls=branchClasses[0];
   const member=st.students.find(s=>s.classId===cls.id);
   if(member){
-    member.status="inqueue";w.SD.save();
-    const feed=w.SD.classFeed(cls.id);
-    ok(feed.some(f=>f.student.id===member.id&&f.announced),"announced arrival appears in the class feed");
+    member.method="bus2";st.overrides=st.overrides.filter(o=>o.student!==member.name_en);w.SD.save();
+    ok(!w.SD.classroomStudents(cls.id).some(x=>x.student.id===member.id),"plain bus2 (no override) is excluded");
+    member.method="car";w.SD.save();
+    ok(w.SD.classroomStudents(cls.id).some(x=>x.student.id===member.id),"car-pickup student is included");
+    member.method="bus1m";w.SD.save();
+    ok(w.SD.classroomStudents(cls.id).some(x=>x.student.id===member.id),"bus 1-way morning student is included");
+    // active override includes an otherwise-excluded bus2 kid
+    member.method="bus2";st.overrides.push({id:"OV-cl",student:member.name_en,from:"bus2",to:"car",status:"pending",date:w.SD.dateStr()});w.SD.save();
+    const row=w.SD.classroomStudents(cls.id).find(x=>x.student.id===member.id);
+    ok(!!row&&row.override.state==="pending","student with an active override is included with its override status");
   }
-  // a class in a disabled branch yields an empty feed even if a student is inqueue
-  const offClass=w.SD.classes().find(c=>!w.SD.branchClassesEnabled(c.branchId));
-  if(offClass){
-    ok(w.SD.classFeed(offClass.id).length===0,"disabled-branch class has an empty teacher feed");
-  }else{ok(true,"no disabled-branch class to check (skipped)");}
+  // the board renders rows with method + override badges
+  brSel.dispatchEvent(new w.Event("change"));
+  clsSel.value=cls.id;clsSel.dispatchEvent(new w.Event("change"));
+  ok(w.document.querySelectorAll("#board .card").length===w.SD.classroomStudents(cls.id).length,"board renders one row per pickup-relevant student");
+  // teacher.html no longer exists; classroom.html is the page
+  ok(!!w.document.getElementById("branchSelect"),"classroom page has a branch selector");
 }
 
 console.log("\n"+(fail?("FAILED: "+fail+" / passed "+pass):("ALL "+pass+" RUNTIME TESTS PASSED ✅")));

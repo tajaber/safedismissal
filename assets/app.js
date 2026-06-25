@@ -299,10 +299,10 @@
     requested_at:{en:"Requested",ar:"وقت الطلب"},
     requested_by:{en:"Requested by",ar:"مقدّم الطلب"},
 
-    /* classes & teacher */
-    nav_teacher:{en:"Teacher",ar:"المعلّم"},
-    role_teacher:{en:"Teacher / Classroom",ar:"المعلّم / الصف"},
-    role_teacher_d:{en:"See approved overrides & announced arrivals for your class in real time",ar:"اطّلع على الاستثناءات المعتمدة وإعلانات الوصول لصفك لحظيًا"},
+    /* classes & classroom board */
+    nav_classroom:{en:"Classroom",ar:"الصف"},
+    role_classroom:{en:"Classroom",ar:"الصف"},
+    role_classroom_d:{en:"Per-class view of pickup-relevant students, dismissal methods & override status",ar:"عرض لكل صف للطلاب المعنيين بالاستلام وطرق الانصراف وحالة الاستثناء"},
     tab_classes:{en:"Classes",ar:"الفصول"},
     classes_title:{en:"Classes & Classroom Display",ar:"الفصول وعرض الصف"},
     classes_help:{en:"Enable the classroom display per branch so teachers see approved overrides and announced arrivals. When enabled, add classes and link students to them.",ar:"فعِّل عرض الصف لكل فرع ليرى المعلّمون الاستثناءات المعتمدة وإعلانات الوصول. عند التفعيل، أضف الفصول واربط الطلاب بها."},
@@ -317,8 +317,14 @@
     classes_disabled_branch:{en:"Classroom display is disabled for this branch.",ar:"عرض الصف معطّل لهذا الفرع."},
     no_classes:{en:"No classes yet. Add one above.",ar:"لا توجد فصول بعد. أضف فصلًا بالأعلى."},
     class_added:{en:"Class added",ar:"تمت إضافة الفصل"},
-    teacher_dash:{en:"Classroom Board",ar:"لوحة الصف"},
-    teacher_sub:{en:"Live approved overrides & announced arrivals for your class",ar:"الاستثناءات المعتمدة وإعلانات الوصول لصفك مباشرةً"},
+    classroom_dash:{en:"Classroom Board",ar:"لوحة الصف"},
+    classroom_sub:{en:"Pickup-relevant students by class — dismissal methods & override status",ar:"الطلاب المعنيون بالاستلام حسب الصف — طرق الانصراف وحالة الاستثناء"},
+    classroom_help:{en:"Lists students on Car pickup or Bus 1-way (morning only), or with an active override request.",ar:"يعرض الطلاب على الاستلام بالسيارة أو الحافلة ذهابًا (صباحًا فقط)، أو من لديهم طلب استثناء نشط."},
+    classroom_empty:{en:"No pickup-relevant students in this class yet.",ar:"لا يوجد طلاب معنيون بالاستلام في هذا الصف بعد."},
+    select_branch_first:{en:"Select a branch and a class to see students.",ar:"اختر فرعًا وصفًا لعرض الطلاب."},
+    ov_status_pending:{en:"Override: Pending",ar:"الاستثناء: معلّق"},
+    ov_status_approved:{en:"Override: Approved",ar:"الاستثناء: معتمد"},
+    ov_status_none:{en:"No override",ar:"بدون استثناء"},
     select_class:{en:"Select class",ar:"اختر الفصل"},
     feed_announced:{en:"Announced — heading to gate",ar:"تم الإعلان — متوجه للبوابة"},
     feed_override:{en:"Override approved — car pick-up",ar:"اعتُمد الاستثناء — استلام بالسيارة"},
@@ -568,6 +574,17 @@
     }).filter(x=>x.announced||x.overrideApproved);
   }
 
+  /* Classroom board list: students in a class who are pickup-relevant — i.e. on Car pickup
+     or Bus 1-way (morning only), OR who have an active override request (pending/approved). */
+  function classroomStudents(classId){
+    return (STATE.students||[]).filter(s=>s.classId===classId).map(s=>{
+      const ov=overrideStateFor(s);
+      const activeOverride=ov.state==="pending"||ov.state==="approved";
+      const byMethod=s.method==="car"||s.method==="bus1m";
+      return {student:s,method:s.method,override:ov,include:byMethod||activeOverride};
+    }).filter(x=>x.include);
+  }
+
   /* ---- per-kid override state (for the guardian app button) ----
      Returns {state:'none'|'pending'|'approved'|'denied', decidedBy} for TODAY. */
   function overrideStateFor(student){
@@ -728,7 +745,7 @@
         '<a href="admin.html" data-i18n="nav_admin"></a>'+
         '<a href="parent.html" data-i18n="nav_parent"></a>'+
         '<a href="security.html" data-i18n="nav_security"></a>'+
-        '<a href="teacher.html" data-i18n="nav_teacher"></a>'+
+        '<a href="classroom.html" data-i18n="nav_classroom"></a>'+
         '<a href="dashboard.html" data-i18n="nav_dashboard"></a>'+
         '<a href="#" data-reset-demo style="color:var(--alert)">↻ <span data-i18n="reset_demo"></span></a>'+
         '</div></div>';
@@ -761,7 +778,7 @@
     branches,branchById,branchName,branchPhone,branchCallCenter,setBranchCallCenter,branchGates,admins,adminsForBranch,adminName,
     security,securityForBranch,securityName,addSecurity,moveSecurity,
     addBranch,addAdmin,moveAdmin,moveStudent,studentBranch,
-    classes,classById,className,classesForBranch,branchClassesEnabled,setBranchClasses,addClass,setStudentClass,classFeed,
+    classes,classById,className,classesForBranch,branchClassesEnabled,setBranchClasses,addClass,setStudentClass,classFeed,classroomStudents,
     overrideStateFor,hasApprovedOverride,
     personName,localizeStudentName,
     state:()=>STATE,

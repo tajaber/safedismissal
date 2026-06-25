@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Classroom</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="Classroom">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <h1 class="page-title" data-i18n="classroom_dash"></h1>
+  <p class="page-sub" data-i18n="classroom_sub"></p>
+
+  <div class="card pad" style="margin-bottom:16px">
+    <div class="grid grid-2">
+      <div class="field" style="margin:0">
+        <label data-i18n="select_branch"></label>
+        <select id="branchSelect"></select>
+      </div>
+      <div class="field" style="margin:0">
+        <label data-i18n="select_class"></label>
+        <select id="classSelect"></select>
+      </div>
+    </div>
+    <p class="muted" style="font-size:13px;margin:10px 0 0" data-i18n="classroom_help"></p>
+  </div>
+
+  <div id="noClasses" class="card pad center hidden">
+    <div style="font-size:34px">🏫</div>
+    <p class="muted" data-i18n="no_class_branches"></p>
+  </div>
+
+  <div class="card" id="boardCard">
+    <div class="card-h">
+      <span id="boardTitle"></span>
+      <span class="spacer" style="flex:1"></span>
+      <span class="badge badge-green" id="boardCount"></span>
+    </div>
+    <div class="card-b" id="board"></div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  function enabledBranches(){
+    return SD.branches().filter(b=>SD.branchClassesEnabled(b.id));
+  }
+  function fillBranches(){
+    const sel=document.getElementById("branchSelect");
+    const list=enabledBranches();
+    const noBox=document.getElementById("noClasses");
+    const boardCard=document.getElementById("boardCard");
+    if(!list.length){
+      sel.innerHTML="";
+      noBox.classList.remove("hidden");
+      boardCard.classList.add("hidden");
+      return false;
+    }
+    noBox.classList.add("hidden");
+    boardCard.classList.remove("hidden");
+    const cur=sel.value;
+    sel.innerHTML=list.map(b=>"<option value='"+b.id+"'>"+SD.branchName(b)+"</option>").join("");
+    if(cur&&list.some(b=>b.id===cur))sel.value=cur;
+    return true;
+  }
+  function fillClasses(){
+    const branchId=document.getElementById("branchSelect").value;
+    const sel=document.getElementById("classSelect");
+    const list=SD.classesForBranch(branchId);
+    const cur=sel.value;
+    sel.innerHTML=list.length
+      ? list.map(c=>"<option value='"+c.id+"'>"+SD.className(c)+"</option>").join("")
+      : "<option value=''>"+SD.t("no_classes")+"</option>";
+    if(cur&&list.some(c=>c.id===cur))sel.value=cur;
+  }
+  function methodBadge(m){
+    const cls=m==="car"?"badge-green":"badge-navy";
+    return "<span class='badge "+cls+"'>"+SD.t(m)+"</span>";
+  }
+  function overrideBadge(ov){
+    if(ov.state==="approved")return "<span class='badge badge-green'>🚗 "+SD.t("ov_status_approved")+"</span>";
+    if(ov.state==="pending")return "<span class='badge badge-amber'>⏳ "+SD.t("ov_status_pending")+"</span>";
+    return "<span class='badge badge-navy' style='opacity:.6'>"+SD.t("ov_status_none")+"</span>";
+  }
+  function renderBoard(){
+    const branchId=document.getElementById("branchSelect").value;
+    const clsId=document.getElementById("classSelect").value;
+    const cls=SD.classById(clsId);
+    const board=document.getElementById("board");
+    const title=document.getElementById("boardTitle");
+    const count=document.getElementById("boardCount");
+    if(!cls){title.textContent="";count.textContent="";board.innerHTML="<p class='muted'>"+SD.t("select_branch_first")+"</p>";return;}
+    title.textContent=SD.className(cls)+" · "+SD.branchName(branchId);
+    const list=SD.classroomStudents(cls.id);
+    count.textContent=list.length+"";
+    if(!list.length){board.innerHTML="<p class='muted'>"+SD.t("classroom_empty")+"</p>";return;}
+    board.innerHTML="";
+    list.forEach(item=>{
+      const s=item.student;
+      const row=document.createElement("div");
+      row.className="card pad";row.style.cssText="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap";
+      row.innerHTML="<div style='width:42px;height:42px;border-radius:12px;background:var(--navy-50);display:grid;place-items:center;font-size:20px'>🎒</div>"+
+        "<div style='flex:1;min-width:160px'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:13px'>"+SD.t("grade")+" "+s.grade+" · "+s.id+"</div></div>"+
+        "<div style='display:flex;gap:6px;flex-wrap:wrap'>"+methodBadge(item.method)+overrideBadge(item.override)+"</div>";
+      board.appendChild(row);
+    });
+  }
+  function renderAll(){if(fillBranches()){fillClasses();renderBoard();}}
+  document.getElementById("branchSelect").onchange=()=>{fillClasses();renderBoard();};
+  document.getElementById("classSelect").onchange=renderBoard;
+  document.addEventListener("langchange",renderAll);
+  document.addEventListener("sdsync",renderAll);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(renderAll,0));
+})();
+</script>
+</body>
+</html>
