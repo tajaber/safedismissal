@@ -150,13 +150,13 @@
         <div class="field"><label data-i18n="parent_email"></label><input class="input" type="email"></div>
         <div class="field"><label data-i18n="coparent_phone"></label><input class="input" placeholder="07xxxxxxxx"></div>
         <div class="field"><label data-i18n="coparent_email"></label><input class="input" type="email"></div>
-        <div class="field"><label data-i18n="parent_branch"></label><select class="input" id="inviteBranch"></select></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin:6px 0">
         <h4 style="margin:0;flex:1" data-i18n="children"></h4>
         <button class="btn btn-ghost" id="addKid" type="button">＋ <span data-i18n="add_child"></span></button>
       </div>
       <p class="muted" style="font-size:13px;margin-top:0" data-i18n="children_help"></p>
+      <p class="muted" style="font-size:13px;margin-top:0" data-i18n="parent_branch_auto"></p>
       <div id="kidRows"></div>
       <button class="btn btn-primary" id="sendInvite" style="margin-top:6px" data-i18n="send_invite"></button>
     </div>
@@ -268,12 +268,12 @@
 
   document.getElementById("sendInvite").onclick=()=>{
     const rows=[...document.querySelectorAll("#kidRows [data-kid]")];
-    const parentBranch=(document.getElementById("inviteBranch")||{}).value||(SD.branches()[0]||{}).id;
+    const defBranch=(SD.branches()[0]||{}).id;
     const kids=rows.map(r=>({
       name:r.querySelector(".k-name").value.trim(),
       id:r.querySelector(".k-id").value.trim(),
       band:r.querySelector(".k-band").value,
-      branch:(r.querySelector(".k-branch")||{}).value||parentBranch
+      branch:(r.querySelector(".k-branch")||{}).value||defBranch
     })).filter(k=>k.name);
     if(!kids.length){SD.toast(SD.curLang()==="ar"?"أضف طفلًا واحدًا على الأقل":"Add at least one child","warn");return;}
     // sample grade per band so each kid maps to the right dismissal level
@@ -288,7 +288,7 @@
     SD.save();renderQR();renderStudents();
     const list=kids.map(k=>{const b=SD.gradeBands().find(x=>x.id===k.band);return "<li>"+k.name+(k.id?(" · "+k.id):"")+" — "+SD.bandName(b)+" · "+SD.branchName(k.branch)+"</li>";}).join("");
     SD.modal({title:SD.t("send_invite"),
-      body:"<p>"+(SD.curLang()==="ar"?"تم إرسال دعوات SMS/بريد إلى ولي الأمر1 وولي الأمر2، وإنشاء حسابات الأبناء التالية برموز QR:":"SMS/email invitations sent to guardian/parent &amp; guardian/parent2. The following children were created with onboarding QR codes:")+"</p><ul style='margin:6px 0 10px;padding-inline-start:18px'>"+list+"</ul><div class='qr'>"+SD.qrSvg("invite-"+Date.now())+"</div>",
+      body:"<p>"+(SD.curLang()==="ar"?"تم إرسال دعوات SMS/بريد إلى ولي الأمر1 وولي الأمر2، وإنشاء حسابات الأبناء التالية برموز QR:":"SMS/email invitations sent to guardian/parent &amp; guardian/parent2. The following children were created with onboarding QR codes:")+"</p><ul style='margin:6px 0 10px;padding-inline-start:18px'>"+list+"</ul><p class='muted' style='font-size:13px'>"+SD.t("parent_branch_auto")+"</p><div class='qr'>"+SD.qrSvg("invite-"+Date.now())+"</div>",
       buttons:[{label:SD.t("close"),class:"btn-primary"}]});
     document.getElementById("kidRows").innerHTML="";addKidRow();
   };
@@ -460,7 +460,6 @@
   }
 
   function refreshBranchSelects(){
-    fillBranchSelect(document.getElementById("inviteBranch"));
     fillBranchSelect(document.getElementById("adBranch"));
     fillBranchSelect(document.getElementById("clBranch"));
   }

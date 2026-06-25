@@ -250,6 +250,7 @@
     students_title:{en:"Students & Branch Assignment",ar:"الطلاب وإسناد الفروع"},
     students_help:{en:"Each student belongs to one branch at a time. Move a student between branches whenever needed.",ar:"ينتمي كل طالب إلى فرع واحد في كل مرة. انقل الطالب بين الفروع متى لزم الأمر."},
     parent_branch:{en:"Guardian/Parent branch",ar:"فرع ولي الأمر1"},
+    parent_branch_auto:{en:"The guardian/parent's branch is assigned automatically from each child's branch — no need to pick one here.",ar:"يُسنَد فرع ولي الأمر تلقائيًا من فرع كل طفل — لا حاجة لاختياره هنا."},
     no_students:{en:"No students yet",ar:"لا يوجد طلاب بعد"},
     your_branch:{en:"Your branch",ar:"فرعك"},
     acting_as:{en:"Acting as",ar:"تعمل بصفة"},

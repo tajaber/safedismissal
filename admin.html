@@ -55,15 +55,15 @@
   <section data-pane="invite" class="hidden">
     <div class="card pad">
       <h3 style="margin-top:0" data-i18n="invite_partner"></h3>
-      <div class="grid grid-3">
+      <div class="grid grid-2">
         <div class="field" style="margin:0"><label data-i18n="parent_phone"></label><input class="input" id="aiParentPhone" placeholder="07xxxxxxxx"></div>
         <div class="field" style="margin:0"><label data-i18n="parent_email"></label><input class="input" id="aiParentEmail" type="email"></div>
-        <div class="field" style="margin:0"><label data-i18n="parent_branch"></label><select id="aiParentBranch"></select></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin:12px 0 4px">
         <h4 style="margin:0;flex:1" data-i18n="children"></h4>
         <button class="btn btn-ghost" id="aiAddKid" type="button">＋ <span data-i18n="add_child"></span></button>
       </div>
+      <p class="muted" style="font-size:13px;margin-top:0" data-i18n="parent_branch_auto"></p>
       <div id="aiKidRows"></div>
       <button class="btn btn-primary" id="aiSend" style="margin-top:6px" data-i18n="send_invite"></button>
     </div>
@@ -273,30 +273,30 @@
     div.querySelector(".ak-remove").onclick=()=>div.remove();
     rows.appendChild(div);
   }
-  function renderAiInvite(){
-    const sel=document.getElementById("aiParentBranch");if(sel)sel.innerHTML=branchOptions(curBranch());
-  }
   const aiAddKidBtn=document.getElementById("aiAddKid");if(aiAddKidBtn)aiAddKidBtn.onclick=()=>aiAddKidRow();
   const aiSendBtn=document.getElementById("aiSend");
   if(aiSendBtn)aiSendBtn.onclick=()=>{
     const phone=document.getElementById("aiParentPhone").value.trim();
-    const pBranch=document.getElementById("aiParentBranch").value;
+    const defBranch=curBranch();
     const rows=[...document.querySelectorAll("#aiKidRows [data-kid]")];
     const sampleGrade={kg:"KG2",lower:"2-A",upper:"5-A"};
-    const st=SD.state();let n=0;
+    const st=SD.state();let n=0;const usedBranches=new Set();
     rows.forEach(r=>{
       const name=r.querySelector(".ak-name").value.trim();if(!name)return;
-      const band=r.querySelector(".ak-band").value,br=r.querySelector(".ak-branch").value||pBranch;
+      const band=r.querySelector(".ak-band").value,br=r.querySelector(".ak-branch").value||defBranch;
+      usedBranches.add(br);
       const sid="S-"+Math.floor(1200+Math.random()*800);
       st.students.push({id:sid,name_en:name,name_ar:name,grade:sampleGrade[band]||"5-A",method:"bus2",parent:"Invited Parent",branchId:br,status:"waiting"});
       st.audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Invited child "+name+" → "+SD.branchName(br),event_ar:"دعوة الطفل "+name+" → "+SD.branchName(br),type:"info"});n++;
     });
     if(!phone&&!n){SD.toast(SD.curLang()==="ar"?"أدخل هاتف ولي الأمر1 أو طفلًا واحدًا":"Enter a guardian/parent phone or at least one child","warn");return;}
-    st.audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Invited guardian/parent "+(phone||"")+" → "+SD.branchName(pBranch),event_ar:"دعوة ولي الأمر1 "+(phone||"")+" → "+SD.branchName(pBranch),type:"info"});
+    // Guardian branch(es) are auto-derived from the children's assigned branches.
+    const brLabel=[...usedBranches].map(id=>SD.branchName(id)).join(", ")||SD.branchName(defBranch);
+    st.audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Invited guardian/parent "+(phone||"")+" → "+brLabel+" (auto from children)",event_ar:"دعوة ولي الأمر1 "+(phone||"")+" → "+brLabel+" (تلقائيًا من الأبناء)",type:"info"});
     SD.save();renderAiStudents();
     document.getElementById("aiParentPhone").value="";document.getElementById("aiParentEmail").value="";
-    document.getElementById("aiKidRows").innerHTML="";
-    SD.toast((SD.curLang()==="ar"?"تم إرسال الدعوة · الفرع: ":"Invitation sent · branch: ")+SD.branchName(pBranch)+(n?(" · "+n+" "+SD.t("children")):""),"success");
+    document.getElementById("aiKidRows").innerHTML="";aiAddKidRow();
+    SD.toast((SD.curLang()==="ar"?"تم إرسال الدعوة · الفرع: ":"Invitation sent · branch: ")+brLabel+(n?(" · "+n+" "+SD.t("children")):""),"success");
   };
 
   /* ---- Admin: move students between branches ---- */
@@ -326,7 +326,7 @@
     SD.toast("Override deadline set to "+this.value+" min before dismissal","");
   };
 
-  function renderAll(){renderContext();renderFirst();renderMethods();renderOverrides();renderBands();renderAiInvite();renderAiStudents();}
+  function renderAll(){renderContext();renderFirst();renderMethods();renderOverrides();renderBands();renderAiStudents();}
   aiAddKidRow();
   document.addEventListener("langchange",renderAll);
   document.addEventListener("sdsync",renderAll);

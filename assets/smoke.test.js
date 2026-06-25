@@ -329,6 +329,7 @@ console.log("TEST: moderator branch/admin/student management");
   ok(w.SD.state().students.find(s=>s.id===sid).branchId===newBranch,"moving a student updates its branchId");
   // invite kid row has a branch select
   ok(!!w.document.querySelector("#kidRows .k-branch"),"invite kid row has a branch selector");
+  ok(!w.document.getElementById("inviteBranch"),"moderator invite has NO guardian/parent-branch select (auto from kids)");
   w.document.getElementById("addKid").click();
   const kbranches=[...w.document.querySelectorAll("#kidRows .k-branch")].pop();
   ok(kbranches.options.length===w.SD.branches().length,"a new kid branch dropdown lists all current branches");
@@ -349,8 +350,8 @@ console.log("TEST: admin invite + move + branch context");
   // override request card shows the kid's branch + school details
   const ovCard=w.document.querySelector("#ovCards .card");
   ok(ovCard&&/📍/.test(ovCard.textContent),"override card shows the kid's branch/location & school details");
-  // admin invite assigns a branch
-  ok(!!w.document.getElementById("aiParentBranch"),"admin invite has a parent-branch select");
+  // admin invite: no guardian-branch selector (auto-derived from each child's branch)
+  ok(!w.document.getElementById("aiParentBranch"),"admin invite has NO guardian/parent-branch select (auto from kids)");
   ok(!!w.document.querySelector("#aiKidRows .ak-branch"),"admin invite kid row has a branch select");
 }
 
