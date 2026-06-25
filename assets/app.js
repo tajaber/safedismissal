@@ -214,7 +214,7 @@
     student_id:{en:"Student ID",ar:"رقم الطالب"},
     dismissal_level:{en:"Dismissal level",ar:"مرحلة الانصراف"},
     remove:{en:"Remove",ar:"إزالة"},
-    school_name:{en:"Fareed Star Academy School",ar:"مدرسة فريد ستار الأكاديمية"},
+    school_name:{en:"Alfarid Star Academy & Schools",ar:"أكاديمية ومدارس نجمة الفريد"},
     school_city:{en:"Amman, Jordan",ar:"عمّان، الأردن"},
     school_phone:{en:"0791234567",ar:"0791234567"},
     label_phone:{en:"Phone",ar:"الهاتف"},

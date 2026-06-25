@@ -232,9 +232,9 @@ console.log("TEST: updated school/parents/kids data + Arabic");
 {
   const w=loadPage("index.html");
   // school name bilingual
-  ok(w.SD.t("school_name")==="Fareed Star Academy School","school name EN");
+  ok(w.SD.t("school_name")==="Alfarid Star Academy & Schools","school name EN");
   w.SD.setLang("ar");
-  ok(w.SD.t("school_name").indexOf("فريد ستار")>-1,"school name AR");
+  ok(w.SD.t("school_name").indexOf("نجمة الفريد")>-1,"school name AR");
   ok(w.SD.personName("Tariq Jaber").indexOf("طارق")>-1,"parent name localizes to Arabic");
   w.SD.setLang("en");
   const st=w.SD.state();
