@@ -264,6 +264,28 @@
     branch_location:{en:"Branch / Location",ar:"الفرع / الموقع"},
     notified_admins:{en:"Notified branch admins",ar:"تم إخطار مسؤولي الفرع"},
 
+    /* security personnel (moderator-managed) + gates */
+    tab_security:{en:"Security",ar:"الأمن"},
+    security_title:{en:"Security Personnel Accounts",ar:"حسابات أفراد الأمن"},
+    security_help:{en:"Create gate-security accounts and link each to a branch. You can move a security officer to another branch at any time.",ar:"أنشئ حسابات أمن البوابة واربط كل فرد بفرع. يمكنك نقل فرد الأمن إلى فرع آخر في أي وقت."},
+    create_security:{en:"Create security account",ar:"إنشاء حساب أمن"},
+    security_name:{en:"Security name",ar:"اسم فرد الأمن"},
+    security_phone:{en:"Security phone",ar:"هاتف فرد الأمن"},
+    security_created:{en:"Security account created",ar:"تم إنشاء حساب الأمن"},
+    security_required:{en:"Enter a security name and phone",ar:"أدخل اسم فرد الأمن وهاتفه"},
+    call_center:{en:"Call center phone",ar:"هاتف مركز الاتصال"},
+    call_center_label:{en:"Call center",ar:"مركز الاتصال"},
+    call_center_saved:{en:"Call center number updated",ar:"تم تحديث رقم مركز الاتصال"},
+    select_gate:{en:"Select gate",ar:"اختر البوابة"},
+    gate_label:{en:"Gate",ar:"البوابة"},
+    gate_select_first:{en:"Select the gate to confirm the release.",ar:"اختر البوابة لتأكيد التسليم."},
+    released_at_gate:{en:"Released at",ar:"تم التسليم عند"},
+
+    /* guardian override button states */
+    override_pending_btn:{en:"Pending override approval",ar:"بانتظار اعتماد الاستثناء"},
+    override_approved_btn:{en:"Override Approved",ar:"تم اعتماد الاستثناء"},
+    override_denied_msg:{en:"Override request denied by admin — {admin}",ar:"رُفض طلب الاستثناء من المسؤول — {admin}"},
+
     /* admin tabs */
     tab_override_requests:{en:"Override Requests",ar:"طلبات الاستثناء"},
     tab_invite_parent:{en:"Invite Guardian/Parent",ar:"دعوة ولي الأمر"},
@@ -308,9 +330,9 @@
     securityRequired:true,
     overrideDeadlineMin:30,
     branches:[
-      {id:"main",name_en:"Main Campus",name_ar:"المقر الرئيسي",phone:"0791234567",classesEnabled:true},
-      {id:"north",name_en:"North Branch",name_ar:"الفرع الشمالي",phone:"0791112222",classesEnabled:true},
-      {id:"west",name_en:"West Branch",name_ar:"الفرع الغربي",phone:"0791113333",classesEnabled:false}
+      {id:"main",name_en:"Main Campus",name_ar:"المقر الرئيسي",phone:"0791234567",callCenter:"0790000111",classesEnabled:true,gates:["Gate 1","Gate 2","Gate 3"]},
+      {id:"north",name_en:"North Branch",name_ar:"الفرع الشمالي",phone:"0791112222",callCenter:"0790000222",classesEnabled:true,gates:["North Gate A","North Gate B"]},
+      {id:"west",name_en:"West Branch",name_ar:"الفرع الغربي",phone:"0791113333",callCenter:"0790000333",classesEnabled:false,gates:["West Gate"]}
     ],
     classes:[
       {id:"C-1",name_en:"KG1 — Sunflowers",name_ar:"روضة ١ — دوار الشمس",branchId:"main"},
@@ -322,6 +344,10 @@
       {id:"A-1",name_en:"Reem Odeh",name_ar:"ريم عودة",phone:"0790555001",branchId:"main"},
       {id:"A-2",name_en:"Sami Haddad",name_ar:"سامي حداد",phone:"0790555002",branchId:"north"},
       {id:"A-3",name_en:"Lara Nimer",name_ar:"لارا نمر",phone:"0790555003",branchId:"west"}
+    ],
+    security:[
+      {id:"SEC-1",name_en:"Faisal Omar",name_ar:"فيصل عمر",phone:"0790666001",branchId:"main"},
+      {id:"SEC-2",name_en:"Khaled Nasser",name_ar:"خالد ناصر",phone:"0790666002",branchId:"north"}
     ],
     gradeBands:[
       {id:"kg",name_en:"KG1–KG2",name_ar:"روضة ١–٢",dismissal:"12:30"},
@@ -356,7 +382,7 @@
     ]
   };
 
-  const KEY="safedismiss_state_v5";
+  const KEY="safedismiss_state_v6";
   function load(){
     try{
       const s=JSON.parse(localStorage.getItem(KEY));
@@ -365,8 +391,13 @@
         if(!s.gradeBands)s.gradeBands=JSON.parse(JSON.stringify(DEFAULT_STATE.gradeBands));
         if(!s.branches)s.branches=JSON.parse(JSON.stringify(DEFAULT_STATE.branches));
         if(!s.admins)s.admins=JSON.parse(JSON.stringify(DEFAULT_STATE.admins));
+        if(!s.security)s.security=JSON.parse(JSON.stringify(DEFAULT_STATE.security));
         if(!s.classes)s.classes=JSON.parse(JSON.stringify(DEFAULT_STATE.classes));
-        s.branches.forEach(b=>{if(typeof b.classesEnabled==="undefined")b.classesEnabled=false;});
+        s.branches.forEach((b,i)=>{
+          if(typeof b.classesEnabled==="undefined")b.classesEnabled=false;
+          if(typeof b.callCenter==="undefined")b.callCenter=b.phone||"";
+          if(!Array.isArray(b.gates))b.gates=["Gate 1","Gate 2"];
+        });
         const def=s.branches[0]?s.branches[0].id:"main";
         s.students.forEach(st=>{if(!st.branchId)st.branchId=def;if(typeof st.classId==="undefined")st.classId="";});
         return s;
@@ -384,10 +415,15 @@
      (so the "window closed → phone the school" case still shows) and the older bands
      open (so a parent can actually request an override). */
   function reseedDismissalTimes(){
-    const offsets={kg:-20,lower:90,upper:150}; // minutes from now
+    // Compress the open windows so the older bands never wrap past midnight (which would
+    // break ordering late in the evening). Youngest band stays just past its cutoff (closed).
+    const now=Date.now();
+    const end=new Date();end.setHours(23,50,0,0);
+    const room=Math.max(10,(end.getTime()-now)/60000); // minutes left before ~midnight
+    const offsets={kg:-20,lower:Math.min(90,room*0.5),upper:Math.min(150,room*0.85)};
     (STATE.gradeBands||[]).forEach((b,i)=>{
-      const off=(b.id in offsets)?offsets[b.id]:(60+i*60);
-      const d=new Date(Date.now()+off*60000);
+      const off=(b.id in offsets)?offsets[b.id]:Math.min(60+i*60,room*0.85);
+      const d=new Date(now+off*60000);
       d.setMinutes(Math.round(d.getMinutes()/5)*5,0,0);
       b.dismissal=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
     });
@@ -467,12 +503,27 @@
   function branchById(id){return branches().find(b=>b.id===id)||branches()[0]||null;}
   function branchName(b){if(!b)return "";if(typeof b==="string")b=branchById(b);return b?(curLang()==="ar"?b.name_ar:b.name_en):"";}
   function branchPhone(b){if(typeof b==="string")b=branchById(b);return b?b.phone:"";}
+  function branchCallCenter(b){if(typeof b==="string")b=branchById(b);return b?(b.callCenter||b.phone||""):"";}
+  function setBranchCallCenter(branchId,phone){const b=branchById(branchId);if(b){b.callCenter=phone;save(STATE);}return b;}
+  function branchGates(b){if(typeof b==="string")b=branchById(b);return (b&&Array.isArray(b.gates)&&b.gates.length)?b.gates:["Gate 1","Gate 2"];}
   function admins(){return STATE.admins||[];}
   function adminsForBranch(branchId){return admins().filter(a=>a.branchId===branchId);}
   function adminName(a){return curLang()==="ar"?a.name_ar:a.name_en;}
+  /* ---- security personnel (moderator-managed) ---- */
+  function security(){return STATE.security||[];}
+  function securityForBranch(branchId){return security().filter(x=>x.branchId===branchId);}
+  function securityName(x){return curLang()==="ar"?x.name_ar:x.name_en;}
+  function addSecurity(name,phone,branchId){
+    const id="SEC-"+Date.now().toString(36);
+    STATE.security.push({id,name_en:name,name_ar:name,phone:phone,branchId:branchId});
+    save(STATE);return id;
+  }
+  function moveSecurity(secId,branchId){
+    const x=security().find(s=>s.id===secId);if(x){x.branchId=branchId;save(STATE);}return x;
+  }
   function addBranch(name,phone){
     const id="br"+Date.now().toString(36);
-    STATE.branches.push({id,name_en:name,name_ar:name,phone:phone});
+    STATE.branches.push({id,name_en:name,name_ar:name,phone:phone,callCenter:phone,classesEnabled:false,gates:["Gate 1","Gate 2"]});
     save(STATE);return id;
   }
   function addAdmin(name,phone,branchId){
@@ -514,6 +565,21 @@
       return {student:s,announced:s.status==="inqueue",overrideApproved:!!ov};
     }).filter(x=>x.announced||x.overrideApproved);
   }
+
+  /* ---- per-kid override state (for the guardian app button) ----
+     Returns {state:'none'|'pending'|'approved'|'denied', decidedBy} for TODAY. */
+  function overrideStateFor(student){
+    const today=dateStr();
+    const mine=(STATE.overrides||[]).filter(o=>o.student===student.name_en&&(o.date===today||!o.date));
+    const approved=mine.find(o=>o.status==="approved");
+    if(approved)return {state:"approved",decidedBy:approved.decidedBy||""};
+    const pending=mine.find(o=>o.status==="pending");
+    if(pending)return {state:"pending",decidedBy:""};
+    const denied=mine.find(o=>o.status==="denied");
+    if(denied)return {state:"denied",decidedBy:denied.decidedBy||""};
+    return {state:"none",decidedBy:""};
+  }
+  function hasApprovedOverride(student){return overrideStateFor(student).state==="approved";}
 
 
   /* Arabic display names for people (parents). Falls back to the given name. */
@@ -690,9 +756,11 @@
     setTheme,toggleTheme,curTheme,applyTheme,
     dateStr,dayToken,pickupInfo,
     gradeBands,bandForGrade,bandName,overrideInfoFor,timeToDate,fmtTime,
-    branches,branchById,branchName,branchPhone,admins,adminsForBranch,adminName,
+    branches,branchById,branchName,branchPhone,branchCallCenter,setBranchCallCenter,branchGates,admins,adminsForBranch,adminName,
+    security,securityForBranch,securityName,addSecurity,moveSecurity,
     addBranch,addAdmin,moveAdmin,moveStudent,studentBranch,
     classes,classById,className,classesForBranch,branchClassesEnabled,setBranchClasses,addClass,setStudentClass,classFeed,
+    overrideStateFor,hasApprovedOverride,
     personName,localizeStudentName,
     state:()=>STATE,
     save:()=>save(STATE),

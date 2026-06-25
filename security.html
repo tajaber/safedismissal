@@ -12,7 +12,7 @@
 
 <main id="main" class="container section">
   <h1 class="page-title" data-i18n="sec_dash"></h1>
-  <p class="page-sub">Gate 2 · Officer Faisal
+  <p class="page-sub">Officer Faisal
     <label style="margin-inline-start:14px;font-size:14px;cursor:pointer"><input type="checkbox" id="outdoor"> <span data-i18n="outdoor_mode"></span></label>
   </p>
 
@@ -53,8 +53,21 @@
 <script>
 (function(){
   let scanned=null;
+  let selectedGate=null;   // officer must choose a gate after a successful scan/verify
 
   function queue(){return SD.state().students.filter(s=>s.status==="inqueue");}
+
+  // Gate picker shown once a student is verified; release stays disabled until a gate is chosen.
+  function gatePickerHtml(student){
+    const gates=SD.branchGates(student.branchId);
+    const opts="<option value=''>"+SD.t("select_gate")+"</option>"+gates.map(g=>"<option value='"+g+"' "+(g===selectedGate?"selected":"")+">"+g+"</option>").join("");
+    return "<div class='field' style='margin:10px 0 0'><label>"+SD.t("gate_label")+"</label><select data-gate>"+opts+"</select>"+
+      "<div class='muted' style='font-size:12px;margin-top:4px'>"+SD.t("gate_select_first")+"</div></div>";
+  }
+  function bindGatePicker(scope){
+    const sel=scope.querySelector("[data-gate]");
+    if(sel)sel.onchange=()=>{selectedGate=sel.value||null;renderQueue();};
+  }
 
   function renderQueue(){
     const b=document.getElementById("queueBody");b.innerHTML="";
@@ -62,10 +75,11 @@
     if(!q.length){b.innerHTML="<tr><td colspan='3' class='muted center' style='padding:24px'>"+(SD.curLang()==="ar"?"لا أحد في الطابور":"Queue is empty")+"</td></tr>";}
     q.forEach(s=>{
       const tr=document.createElement("tr");tr.dataset.id=s.id;
-      const enabled=scanned===s.id;
+      const enabled=scanned===s.id&&!!selectedGate;
+      const relLabel=SD.t("confirm_release")+(scanned===s.id&&selectedGate?(" · "+selectedGate):"");
       tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.grade+"</div></td>"+
         "<td data-label='"+SD.t("parent")+"'>"+SD.personName(s.parent)+"</td>"+
-        "<td data-label='"+SD.t("actions")+"'><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+SD.t("confirm_release")+"</button></td>";
+        "<td data-label='"+SD.t("actions")+"'><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+relLabel+"</button></td>";
       const rb=tr.querySelector("[data-rel]");
       if(rb&&enabled)rb.onclick=()=>release(s,tr);
       b.appendChild(tr);
@@ -73,15 +87,17 @@
   }
 
   function release(s,tr){
+    if(!selectedGate){SD.toast(SD.t("gate_select_first"),"warn");return;}
+    const gate=selectedGate;
     tr.classList.add("row-flash");
     s.status="released";
-    SD.state().audit.unshift({time:now(),actor:"Security · Gate 2",
-      event_en:"Released "+s.name_en+" (QR verified)",event_ar:"تم تسليم "+s.name_ar+" (تم التحقق من QR)",type:"released"});
+    SD.state().audit.unshift({time:now(),actor:"Security · "+gate,
+      event_en:"Released "+s.name_en+" (QR verified) at "+gate,event_ar:"تم تسليم "+s.name_ar+" (تم التحقق من QR) عند "+gate,type:"released"});
     SD.save();
-    document.getElementById("log").textContent="✅ "+SD.studentName(s)+" — "+SD.t("released_saved")+" "+now();
-    SD.notify(SD.studentName(s)+" released at Gate 2 — admin & guardian/parent notified",
-      "تم تسليم "+s.name_ar+" عند البوابة 2 — تم إخطار الإدارة وولي الأمر1","success");
-    scanned=null;
+    document.getElementById("log").textContent="✅ "+SD.studentName(s)+" — "+SD.t("released_saved")+" ("+SD.t("released_at_gate")+" "+gate+") "+now();
+    SD.notify(SD.studentName(s)+" released at "+gate+" — admin & guardian/parent notified",
+      "تم تسليم "+s.name_ar+" عند "+gate+" — تم إخطار الإدارة وولي الأمر1","success");
+    scanned=null;selectedGate=null;
     setTimeout(renderQueue,1000);
   }
 
@@ -95,15 +111,18 @@
       box.innerHTML="<div style='font-size:48px'>✅</div>";
       document.getElementById("scanBtn").disabled=false;
       if(!s){box.innerHTML="<div style='font-size:48px'>📷</div>";SD.toast("Queue empty — nothing to scan","warn");return;}
-      scanned=s.id;
+      scanned=s.id;selectedGate=null;
       const info=SD.pickupInfo(s);
       const res=document.getElementById("scanResult");
       res.classList.remove("hidden");
       const refTxt=info.eligible?("<br><span class='badge badge-green'>"+SD.t("scan_ref")+": "+info.ref+"</span><br><span class='muted' style='font-size:12px'>"+SD.t("qr_valid_today")+" · Token "+info.token+"</span>"):("<br><span class='badge badge-red'>"+SD.t("qr_need_override")+"</span>");
       res.innerHTML="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br><span class='muted'>"+SD.t("parent")+": "+SD.personName(s.parent)+"</span><br>"+SD.statusBadge("inqueue")+refTxt;
       if(!info.eligible){scanned=null;SD.toast("Pickup QR invalid for today — verify approval","danger");renderQueue();return;}
+      // officer must pick the gate before release becomes available
+      res.innerHTML+=gatePickerHtml(s);
+      bindGatePicker(res);
       renderQueue();
-      SD.toast("QR matched: "+SD.studentName(s)+" ("+info.ref+") — release enabled","success");
+      SD.toast("QR matched: "+SD.studentName(s)+" ("+info.ref+") — "+SD.t("gate_select_first"),"success");
     },1400);
   };
 
@@ -120,12 +139,15 @@
     if(!matches.length){r.innerHTML="<p class='muted' style='margin-top:10px'>"+(SD.curLang()==="ar"?"لا نتائج مطابقة":"No match in active queue")+"</p>";return;}
     r.innerHTML=matches.map(s=>{
       const info=SD.pickupInfo(s);
-      return "<div class='card pad' style='margin-top:10px'><strong>"+SD.personName(s.parent)+"</strong> — "+SD.studentName(s)+
+      return "<div class='card pad' style='margin-top:10px' data-row='"+s.id+"'><strong>"+SD.personName(s.parent)+"</strong> — "+SD.studentName(s)+
       "<div class='muted' style='font-size:13px'>"+(s.phone||"")+" · "+(s.grade)+" · "+(info.eligible?(SD.t("scan_ref")+": "+info.ref):"—")+"</div>"+
       "<button class='btn btn-success' style='margin-top:8px' data-vid='"+s.id+"'>"+SD.t("verify_identity")+"</button></div>";
     }).join("");
     r.querySelectorAll("[data-vid]").forEach(b=>{
-      b.onclick=()=>{const s=q.find(x=>x.id===b.dataset.vid);scanned=s.id;renderQueue();SD.toast(SD.t("matched")+" · "+SD.studentName(s),"success");};
+      b.onclick=()=>{const s=q.find(x=>x.id===b.dataset.vid);scanned=s.id;selectedGate=null;
+        const row=r.querySelector("[data-row='"+s.id+"']");
+        if(row&&!row.querySelector("[data-gate]")){row.insertAdjacentHTML("beforeend",gatePickerHtml(s));bindGatePicker(row);}
+        renderQueue();SD.toast(SD.t("matched")+" · "+SD.studentName(s)+" — "+SD.t("gate_select_first"),"success");};
     });
   };
 

@@ -19,6 +19,7 @@
     <div class="tab" data-tab="register" data-i18n="tab_register"></div>
     <div class="tab" data-tab="branches" data-i18n="tab_branches"></div>
     <div class="tab" data-tab="admins" data-i18n="tab_admins"></div>
+    <div class="tab" data-tab="security" data-i18n="tab_security"></div>
     <div class="tab" data-tab="classes" data-i18n="tab_classes"></div>
     <div class="tab" data-tab="invite" data-i18n="tab_invite"></div>
     <div class="tab" data-tab="students" data-i18n="tab_students"></div>
@@ -69,14 +70,15 @@
     <div class="card pad">
       <h3 style="margin-top:0" data-i18n="branches_title"></h3>
       <p class="muted" style="font-size:13px" data-i18n="branches_help"></p>
-      <div class="grid grid-3" style="align-items:end">
+      <div class="grid grid-4" style="align-items:end">
         <div class="field" style="margin:0"><label data-i18n="branch_name"></label><input class="input" id="brName" placeholder="e.g. East Branch"></div>
         <div class="field" style="margin:0"><label data-i18n="branch_phone"></label><input class="input" id="brPhone" placeholder="07xxxxxxxx"></div>
+        <div class="field" style="margin:0"><label data-i18n="call_center"></label><input class="input" id="brCall" placeholder="07xxxxxxxx"></div>
         <button class="btn btn-primary" id="addBranch" type="button">＋ <span data-i18n="add_branch"></span></button>
       </div>
       <div style="overflow:auto;margin-top:16px">
         <table class="table table-responsive"><thead><tr>
-          <th data-i18n="branch_name"></th><th data-i18n="branch_phone"></th><th data-i18n="total_students"></th><th data-i18n="tab_admins"></th>
+          <th data-i18n="branch_name"></th><th data-i18n="branch_phone"></th><th data-i18n="call_center"></th><th data-i18n="total_students"></th><th data-i18n="tab_admins"></th>
         </tr></thead><tbody id="brBody"></tbody></table>
       </div>
     </div>
@@ -97,6 +99,25 @@
         <table class="table table-responsive"><thead><tr>
           <th data-i18n="admin_name"></th><th data-i18n="admin_phone"></th><th data-i18n="move_branch"></th>
         </tr></thead><tbody id="adBody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security personnel -->
+  <section data-pane="security" class="hidden">
+    <div class="card pad">
+      <h3 style="margin-top:0" data-i18n="security_title"></h3>
+      <p class="muted" style="font-size:13px" data-i18n="security_help"></p>
+      <div class="grid grid-3" style="align-items:end">
+        <div class="field" style="margin:0"><label data-i18n="security_name"></label><input class="input" id="secName" placeholder="e.g. Faisal Omar"></div>
+        <div class="field" style="margin:0"><label data-i18n="security_phone"></label><input class="input" id="secPhone" placeholder="07xxxxxxxx"></div>
+        <div class="field" style="margin:0"><label data-i18n="assigned_branch"></label><select id="secBranch"></select></div>
+      </div>
+      <button class="btn btn-primary" id="addSecurity" type="button" style="margin-top:4px">＋ <span data-i18n="create_security"></span></button>
+      <div style="overflow:auto;margin-top:16px">
+        <table class="table table-responsive"><thead><tr>
+          <th data-i18n="security_name"></th><th data-i18n="security_phone"></th><th data-i18n="move_branch"></th>
+        </tr></thead><tbody id="secBody"></tbody></table>
       </div>
     </div>
   </section>
@@ -342,20 +363,53 @@
       const tr=document.createElement("tr");
       tr.innerHTML="<td data-label='"+SD.t("branch_name")+"'><strong>"+SD.branchName(b)+"</strong></td>"+
         "<td data-label='"+SD.t("branch_phone")+"'>"+b.phone+"</td>"+
+        "<td data-label='"+SD.t("call_center")+"'><input class='input' data-call='"+b.id+"' value='"+(b.callCenter||"")+"' style='max-width:150px;padding:8px 10px'></td>"+
         "<td data-label='"+SD.t("total_students")+"'>"+count+"</td>"+
         "<td data-label='"+SD.t("tab_admins")+"'>"+adm+"</td>";
+      const ci=tr.querySelector("[data-call]");
+      ci.onchange=()=>{SD.setBranchCallCenter(b.id,ci.value.trim());
+        SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Set call center for "+b.name_en+" → "+ci.value.trim(),event_ar:"ضبط مركز الاتصال لـ "+b.name_en+" → "+ci.value.trim(),type:"info"});SD.save();
+        SD.toast(SD.branchName(b)+" · "+SD.t("call_center_saved"),"success");};
       body.appendChild(tr);
     });
   }
   const addBranchBtn=document.getElementById("addBranch");
   if(addBranchBtn)addBranchBtn.onclick=()=>{
-    const n=document.getElementById("brName").value.trim(),p=document.getElementById("brPhone").value.trim();
+    const n=document.getElementById("brName").value.trim(),p=document.getElementById("brPhone").value.trim(),cc=document.getElementById("brCall").value.trim();
     if(!n||!p){SD.toast(SD.t("branch_required"),"warn");return;}
     const id=SD.addBranch(n,p);
+    if(cc)SD.setBranchCallCenter(id,cc);
     SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Added branch "+n+" ("+p+")",event_ar:"إضافة فرع "+n+" ("+p+")",type:"info"});SD.save();
-    document.getElementById("brName").value="";document.getElementById("brPhone").value="";
-    refreshBranchSelects();renderBranches();renderAdmins();renderStudents();
+    document.getElementById("brName").value="";document.getElementById("brPhone").value="";document.getElementById("brCall").value="";
+    refreshBranchSelects();renderBranches();renderAdmins();renderSecurityPersonnel();renderStudents();
     SD.toast(SD.t("branch_saved")+": "+n,"success");
+  };
+
+  /* ---- Security personnel management ---- */
+  function renderSecurityPersonnel(){
+    const body=document.getElementById("secBody");if(!body)return;body.innerHTML="";
+    SD.security().forEach(x=>{
+      const tr=document.createElement("tr");
+      const sel="<select data-sec='"+x.id+"'>"+branchOptions(x.branchId)+"</select>";
+      tr.innerHTML="<td data-label='"+SD.t("security_name")+"'><strong>"+SD.securityName(x)+"</strong></td>"+
+        "<td data-label='"+SD.t("security_phone")+"'>"+x.phone+"</td>"+
+        "<td data-label='"+SD.t("move_branch")+"'>"+sel+"</td>";
+      const s=tr.querySelector("select");
+      s.onchange=()=>{SD.moveSecurity(x.id,s.value);
+        SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Moved security "+x.name_en+" to "+SD.branchName(s.value),event_ar:"نقل فرد الأمن "+x.name_en+" إلى "+SD.branchName(s.value),type:"info"});SD.save();
+        SD.toast(SD.securityName(x)+" → "+SD.branchName(s.value),"success");};
+      body.appendChild(tr);
+    });
+  }
+  const addSecurityBtn=document.getElementById("addSecurity");
+  if(addSecurityBtn)addSecurityBtn.onclick=()=>{
+    const n=document.getElementById("secName").value.trim(),p=document.getElementById("secPhone").value.trim(),br=document.getElementById("secBranch").value;
+    if(!n||!p){SD.toast(SD.t("security_required"),"warn");return;}
+    SD.addSecurity(n,p,br);
+    SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Created security "+n+" → "+SD.branchName(br),event_ar:"إنشاء أمن "+n+" → "+SD.branchName(br),type:"info"});SD.save();
+    document.getElementById("secName").value="";document.getElementById("secPhone").value="";
+    renderSecurityPersonnel();
+    SD.toast(SD.t("security_created")+": "+n,"success");
   };
 
   /* ---- Admins management ---- */
@@ -461,10 +515,11 @@
 
   function refreshBranchSelects(){
     fillBranchSelect(document.getElementById("adBranch"));
+    fillBranchSelect(document.getElementById("secBranch"));
     fillBranchSelect(document.getElementById("clBranch"));
   }
 
-  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();setSchoolFields();refreshBranchSelects();renderBranches();renderAdmins();renderStudents();renderBranchFeatures();renderClassStudents();}
+  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();setSchoolFields();refreshBranchSelects();renderBranches();renderAdmins();renderSecurityPersonnel();renderStudents();renderBranchFeatures();renderClassStudents();}
   const af=document.getElementById("auditFilter");if(af)af.oninput=renderAudit;
   const ec=document.getElementById("exportCsv");if(ec)ec.onclick=exportCsv;
   addKidRow();

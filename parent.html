@@ -63,13 +63,8 @@
 
   function methodIsCar(m){return m==="car";}
   function arrivalEnabled(s){
-    if(s.method==="car")return true;
-    if(s.method==="bus1a"){
-      // Afternoon-only bus: announce is hidden until an override is approved for THIS kid.
-      const today=SD.dateStr();
-      return SD.state().overrides.some(o=>o.student===s.name_en&&o.status==="approved"&&(o.date===today||!o.date));
-    }
-    return false;
+    // Announce is available for native car pickups, or for any kid with an approved override today.
+    return s.method==="car"||SD.hasApprovedOverride(s);
   }
 
   function fmtLeft(ms){
@@ -87,19 +82,42 @@
     const wrap=document.getElementById("kids");wrap.innerHTML="";
     kids.forEach(s=>{
       const c=document.createElement("div");c.className="card pad";c.style.marginBottom="14px";
-      const canAnnounce=arrivalEnabled(s);
       const isCar=s.method==="car";
-      // bus1a without an approved override hides the Announce button entirely (per policy).
-      const announceHidden=(s.method==="bus1a"||s.method==="bus1m"||s.method==="bus2")&&!canAnnounce;
+      const ovSt=SD.overrideStateFor(s);            // none | pending | approved | denied (today)
+      const canAnnounce=arrivalEnabled(s);          // car OR approved override
+      // Announce is hidden for plain bus methods unless an override is approved for this kid.
+      const announceHidden=!isCar&&!canAnnounce;
       // Each kid's override window is computed from ITS OWN grade band's dismissal time.
       const od=SD.overrideInfoFor(s);
       const br=SD.studentBranch(s);
+      const callCenter=br?SD.branchCallCenter(br):"";
       const bandLine="<span class='badge badge-navy' style='margin-top:6px'>"+SD.bandName(od.band)+" · "+SD.t("dismissal_time")+" "+SD.fmtTime(od.band.dismissal)+"</span>";
       const branchLine=br?"<span class='badge badge-green' style='margin-top:6px;margin-inline-start:6px'>📍 "+SD.branchName(br)+"</span>":"";
-      // Car kids never need an override, so the override window line is hidden for them.
-      const ovLine=isCar?"":(od.open
-        ? "<div class='muted' style='font-size:12px;margin:8px 0 0'>⏳ "+SD.t("override_closes")+" "+fmtLeft(od.msLeft)+" ("+SD.t("cutoff_label")+" "+SD.fmtTime(od.deadline.toTimeString().slice(0,5))+")</div>"
-        : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked").replace("0791234567",(br?br.phone:"0791234567"))+"</div>");
+
+      // Override control button — state machine per kid (hidden entirely for native car kids).
+      let overrideBtn="";
+      if(!isCar){
+        if(ovSt.state==="approved"){
+          overrideBtn="<button class='btn btn-success' disabled style='flex:1'>✓ "+SD.t("override_approved_btn")+"</button>";
+        }else if(ovSt.state==="pending"){
+          overrideBtn="<button class='btn btn-ghost' disabled style='flex:1'>⏳ "+SD.t("override_pending_btn")+"</button>";
+        }else{
+          overrideBtn="<button class='btn btn-ghost' data-override='"+s.id+"' "+(od.open?"":"disabled")+" style='flex:1'>"+SD.t("request_override")+"</button>";
+        }
+      }
+      // Sub-line under the buttons: denied message, else the window countdown/blocked (non-car, no approval).
+      let ovLine="";
+      if(!isCar){
+        if(ovSt.state==="denied"){
+          ovLine="<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_denied_msg").replace("{admin}",SD.personName(ovSt.decidedBy)||SD.t("acting_as"))+"</div>";
+        }else if(ovSt.state==="none"){
+          ovLine=od.open
+            ? "<div class='muted' style='font-size:12px;margin:8px 0 0'>⏳ "+SD.t("override_closes")+" "+fmtLeft(od.msLeft)+" ("+SD.t("cutoff_label")+" "+SD.fmtTime(od.deadline.toTimeString().slice(0,5))+")</div>"
+            : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked").replace("0791234567",(callCenter||(br?br.phone:"0791234567")))+"</div>";
+        }
+      }
+      // Last line of every card: the branch/location call-center phone.
+      const callLine=callCenter?("<div class='muted' style='font-size:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)'>☎ "+SD.t("call_center_label")+": <strong>"+callCenter+"</strong></div>"):"";
       c.innerHTML=
         "<div style='display:flex;align-items:center;gap:10px'>"+
           "<div style='width:42px;height:42px;border-radius:12px;background:var(--navy-50);display:grid;place-items:center;font-size:20px'>🎒</div>"+
@@ -115,12 +133,12 @@
           (announceHidden?"":"<button class='btn "+(canAnnounce?"btn-success btn-glow":"btn-ghost")+"' data-announce='"+s.id+"' "+(canAnnounce?"":"disabled")+" style='flex:1'>"+SD.t("announce_arrival")+"</button>")+
         "</div>"+
         "<div style='display:flex;gap:8px;margin-top:8px;flex-wrap:wrap'>"+
-          // Car pickup needs no override request — hide that button; keep Show QR.
-          (isCar?"":"<button class='btn btn-ghost' data-override='"+s.id+"' "+(od.open?"":"disabled")+" style='flex:1'>"+SD.t("request_override")+"</button>")+
+          overrideBtn+
           "<button class='btn btn-ghost' data-qr='"+s.id+"' style='flex:1'>"+SD.t("show_qr")+"</button>"+
         "</div>"+
         ovLine+
-        "<div class='lane hidden' data-lane='"+s.id+"' style='margin-top:10px'><div class='slot'>A</div><div class='muted' style='font-size:13px'>"+SD.t("pull_forward")+"</div></div>";
+        "<div class='lane hidden' data-lane='"+s.id+"' style='margin-top:10px'><div class='slot'>A</div><div class='muted' style='font-size:13px'>"+SD.t("pull_forward")+"</div></div>"+
+        callLine;
       wrap.appendChild(c);
     });
     bind();
@@ -151,7 +169,8 @@
         const od=SD.overrideInfoFor(s);
         const br=SD.studentBranch(s);
         const branchPhone=br?br.phone:"0791234567";
-        if(!od.open){SD.modal({title:SD.t("request_override"),body:"<p style='color:var(--alert)'>"+SD.t("override_blocked").replace("0791234567",branchPhone)+"</p>",buttons:[{label:SD.t("close"),class:"btn-danger"}]});return;}
+        const callCenter=br?SD.branchCallCenter(br):branchPhone;
+        if(!od.open){SD.modal({title:SD.t("request_override"),body:"<p style='color:var(--alert)'>"+SD.t("override_blocked").replace("0791234567",callCenter)+"</p>",buttons:[{label:SD.t("close"),class:"btn-danger"}]});return;}
         const branchBox=br?("<div class='card pad' style='margin:10px 0;background:var(--navy-50)'>"+
               "<div class='muted' style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px'>"+SD.t("branch_location")+"</div>"+
               "<strong>📍 "+SD.branchName(br)+"</strong> · "+branchPhone+"</div>"):"";

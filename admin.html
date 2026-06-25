@@ -252,8 +252,10 @@
     o.date=SD.dateStr();
     const st=SD.state();
     const stu=st.students.find(s=>SD.studentName(s)===o.student||s.name_en===o.student);
-    if(approved&&stu){stu.method="car";stu.status="inqueue";}
-    const who="Admin · "+(curAdmin()?curAdmin().name_en:"Reem");
+    const adminEn=curAdmin()?curAdmin().name_en:"Reem Odeh";
+    // Record who decided so the guardian app can show "Override Approved" / denied-by-<admin>.
+    o.decidedBy=adminEn;
+    const who="Admin · "+adminEn;
     st.audit.unshift({time:nowTime(),actor:who,
       event_en:(approved?"Approved":"Denied")+" override "+o.id+(stu?(" ("+SD.branchName(stu.branchId)+")"):""),
       event_ar:(approved?"اعتماد":"رفض")+" استثناء "+o.id,type:approved?"approved":"denied"});

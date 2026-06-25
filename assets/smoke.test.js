@@ -445,9 +445,93 @@ console.log("TEST: parent car-pickup hides Request Override, keeps Announce + Sh
   ok(!w.document.querySelector("[data-override='"+bisan.id+"']"),"car kid has NO Request Override button");
   ok(!!w.document.querySelector("[data-announce='"+bisan.id+"']"),"car kid shows Announce Arrival");
   ok(!!w.document.querySelector("[data-qr='"+bisan.id+"']"),"car kid shows Show QR");
-  // a non-car kid (Razan, bus2) still exposes the override button
+  // a non-car kid with no override yet still exposes the Request Override button.
+  // (Razan has a seeded pending override → shows the pending state instead, asserted later.)
+  const saad=st.students.find(s=>s.name_en==="Saad Jaber");
+  st.overrides=st.overrides.filter(o=>o.student!=="Saad Jaber");w.SD.save();
+  w.document.dispatchEvent(new w.Event("sdsync"));
+  ok(saad&&saad.method!=="car","Saad Jaber is a non-car kid");
+  ok(!!w.document.querySelector("[data-override='"+saad.id+"']"),"non-car kid with no override shows Request Override");
+  // a non-car kid with a pending override shows the 'Pending override approval' state (no request button)
   const razan=st.students.find(s=>s.name_en==="Razan Jaber");
-  ok(!!w.document.querySelector("[data-override='"+razan.id+"']"),"non-car kid still shows Request Override");
+  ok(!w.document.querySelector("[data-override='"+razan.id+"']"),"kid with a pending override hides Request Override");
+  const razanCard=[...w.document.querySelectorAll("#kids > .card")].find(c=>c.textContent.indexOf(w.SD.studentName(razan))>-1);
+  ok(razanCard&&razanCard.textContent.indexOf(w.SD.t("override_pending_btn"))>-1,"pending override shows 'Pending override approval'");
+}
+
+console.log("TEST: parent override button states (approved / denied)");
+{
+  const w=loadPage("parent.html");
+  const st=w.SD.state();
+  const razan=st.students.find(s=>s.name_en==="Razan Jaber");
+  w.document.getElementById("agree").checked=true;
+  w.document.getElementById("agree").dispatchEvent(new w.Event("change"));
+  w.document.getElementById("enter").click();
+  // approve Razan's seeded override
+  const ov=st.overrides.find(o=>o.student==="Razan Jaber");
+  ov.status="approved";ov.date=w.SD.dateStr();ov.decidedBy="Reem Odeh";w.SD.save();
+  w.document.dispatchEvent(new w.Event("sdsync"));
+  const card1=[...w.document.querySelectorAll("#kids > .card")].find(c=>c.textContent.indexOf(w.SD.studentName(razan))>-1);
+  ok(card1&&card1.textContent.indexOf(w.SD.t("override_approved_btn"))>-1,"approved override shows 'Override Approved'");
+  ok(!!w.document.querySelector("[data-announce='"+razan.id+"']"),"approved override reveals Announce Arrival for that kid");
+  // now deny it
+  ov.status="denied";ov.decidedBy="Reem Odeh";w.SD.save();
+  w.document.dispatchEvent(new w.Event("sdsync"));
+  const card2=[...w.document.querySelectorAll("#kids > .card")].find(c=>c.textContent.indexOf(w.SD.studentName(razan))>-1);
+  ok(card2&&card2.textContent.indexOf("Reem Odeh")>-1&&/denied/i.test(card2.textContent),"denied override shows 'denied by admin — <name>'");
+  ok(!!w.document.querySelector("[data-override='"+razan.id+"']"),"denied override restores the Request Override button");
+}
+
+console.log("TEST: parent card shows the branch call-center phone on the last line");
+{
+  const w=loadPage("parent.html");
+  w.document.getElementById("agree").checked=true;
+  w.document.getElementById("agree").dispatchEvent(new w.Event("change"));
+  w.document.getElementById("enter").click();
+  const card=w.document.querySelector("#kids > .card");
+  ok(card&&card.textContent.indexOf(w.SD.t("call_center_label"))>-1,"kid card shows a call-center line");
+  const kid=w.SD.state().students.find(s=>s.parent==="Tariq Jaber");
+  ok(card&&card.textContent.indexOf(w.SD.branchCallCenter(kid.branchId))>-1,"call-center line shows the branch's configured number");
+}
+
+console.log("TEST: moderator manages security personnel + branch call center");
+{
+  const w=loadPage("moderator.html");
+  // security personnel data + tab
+  ok(Array.isArray(w.SD.security())&&w.SD.security().length>=2,"state seeds security personnel");
+  ok(!!w.document.querySelector("#tabs .tab[data-tab='security']"),"moderator has a Security tab");
+  ok(w.document.querySelectorAll("#secBody tr").length===w.SD.security().length,"security table lists all officers");
+  // create a security account
+  const before=w.SD.security().length;
+  w.document.getElementById("secName").value="Omar Said";
+  w.document.getElementById("secPhone").value="0790666099";
+  w.document.getElementById("secBranch").value=w.SD.branches()[0].id;
+  w.document.getElementById("addSecurity").click();
+  ok(w.SD.security().length===before+1,"moderator can create a security account");
+  ok(w.SD.security().some(x=>x.name_en==="Omar Said"&&x.branchId===w.SD.branches()[0].id),"new security officer is linked to the chosen branch");
+  // move a security officer between branches
+  const secSel=w.document.querySelector("#secBody select[data-sec]");
+  const sidd=secSel.getAttribute("data-sec");
+  const tgt=w.SD.branches()[w.SD.branches().length-1].id;
+  secSel.value=tgt;secSel.dispatchEvent(new w.Event("change"));
+  ok(w.SD.security().find(x=>x.id===sidd).branchId===tgt,"moderator can move a security officer to another branch");
+  // configure a branch call center
+  const callInput=w.document.querySelector("#brBody input[data-call]");
+  ok(!!callInput,"branches table exposes an editable call-center field");
+  const bid=callInput.getAttribute("data-call");
+  callInput.value="0791239999";callInput.dispatchEvent(new w.Event("change"));
+  ok(w.SD.branchCallCenter(bid)==="0791239999","editing the call-center field updates the branch record");
+}
+
+console.log("TEST: security gate model (each branch has gates)");
+{
+  const w=loadPage("security.html");
+  w.SD.branches().forEach(b=>{
+    ok(Array.isArray(w.SD.branchGates(b.id))&&w.SD.branchGates(b.id).length>=1,"branch "+b.id+" has at least one gate");
+  });
+  // release buttons remain disabled before a scan (gate selection gates release too)
+  const disabled=[...w.document.querySelectorAll("#queueBody [data-rel]")].every(btn=>btn.disabled);
+  ok(disabled,"release buttons are disabled before scan + gate selection");
 }
 
 console.log("TEST: classes feature (per-branch toggle, add class, link student)");
