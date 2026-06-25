@@ -17,7 +17,11 @@
   <div class="tabs" id="tabs">
     <div class="tab active" data-tab="overview" data-i18n="tab_overview"></div>
     <div class="tab" data-tab="register" data-i18n="tab_register"></div>
+    <div class="tab" data-tab="branches" data-i18n="tab_branches"></div>
+    <div class="tab" data-tab="admins" data-i18n="tab_admins"></div>
+    <div class="tab" data-tab="classes" data-i18n="tab_classes"></div>
     <div class="tab" data-tab="invite" data-i18n="tab_invite"></div>
+    <div class="tab" data-tab="students" data-i18n="tab_students"></div>
     <div class="tab" data-tab="qr" data-i18n="tab_qr"></div>
     <div class="tab" data-tab="audit" data-i18n="tab_audit"></div>
     <div class="tab" data-tab="terms" data-i18n="tab_terms"></div>
@@ -60,6 +64,83 @@
     </div>
   </section>
 
+  <!-- Branches -->
+  <section data-pane="branches" class="hidden">
+    <div class="card pad">
+      <h3 style="margin-top:0" data-i18n="branches_title"></h3>
+      <p class="muted" style="font-size:13px" data-i18n="branches_help"></p>
+      <div class="grid grid-3" style="align-items:end">
+        <div class="field" style="margin:0"><label data-i18n="branch_name"></label><input class="input" id="brName" placeholder="e.g. East Branch"></div>
+        <div class="field" style="margin:0"><label data-i18n="branch_phone"></label><input class="input" id="brPhone" placeholder="07xxxxxxxx"></div>
+        <button class="btn btn-primary" id="addBranch" type="button">＋ <span data-i18n="add_branch"></span></button>
+      </div>
+      <div style="overflow:auto;margin-top:16px">
+        <table class="table table-responsive"><thead><tr>
+          <th data-i18n="branch_name"></th><th data-i18n="branch_phone"></th><th data-i18n="total_students"></th><th data-i18n="tab_admins"></th>
+        </tr></thead><tbody id="brBody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admins -->
+  <section data-pane="admins" class="hidden">
+    <div class="card pad">
+      <h3 style="margin-top:0" data-i18n="admins_title"></h3>
+      <p class="muted" style="font-size:13px" data-i18n="admins_help"></p>
+      <div class="grid grid-3" style="align-items:end">
+        <div class="field" style="margin:0"><label data-i18n="admin_name"></label><input class="input" id="adName" placeholder="e.g. Nour Saleh"></div>
+        <div class="field" style="margin:0"><label data-i18n="admin_phone"></label><input class="input" id="adPhone" placeholder="07xxxxxxxx"></div>
+        <div class="field" style="margin:0"><label data-i18n="assigned_branch"></label><select id="adBranch"></select></div>
+      </div>
+      <button class="btn btn-primary" id="addAdmin" type="button" style="margin-top:4px">＋ <span data-i18n="create_admin"></span></button>
+      <div style="overflow:auto;margin-top:16px">
+        <table class="table table-responsive"><thead><tr>
+          <th data-i18n="admin_name"></th><th data-i18n="admin_phone"></th><th data-i18n="move_branch"></th>
+        </tr></thead><tbody id="adBody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Classes & classroom display (per-branch feature) -->
+  <section data-pane="classes" class="hidden">
+    <div class="card pad" style="margin-bottom:16px">
+      <h3 style="margin-top:0" data-i18n="classes_title"></h3>
+      <p class="muted" style="font-size:13px" data-i18n="classes_help"></p>
+      <div id="branchFeatureList"></div>
+    </div>
+    <div class="card pad">
+      <div class="grid grid-3" style="align-items:end">
+        <div class="field" style="margin:0"><label data-i18n="class_name"></label><input class="input" id="clName" placeholder="e.g. Grade 3 — Lions"></div>
+        <div class="field" style="margin:0"><label data-i18n="branch"></label><select id="clBranch"></select></div>
+        <button class="btn btn-primary" id="addClass" type="button">＋ <span data-i18n="add_class"></span></button>
+      </div>
+      <div style="overflow:auto;margin-top:16px">
+        <table class="table table-responsive"><thead><tr>
+          <th data-i18n="student"></th><th data-i18n="grade"></th><th data-i18n="branch"></th><th data-i18n="link_class"></th>
+        </tr></thead><tbody id="clStuBody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Students (branch assignment / move) -->
+  <section data-pane="students" class="hidden">
+    <div class="card">
+      <div class="card-h">
+        <span data-i18n="students_title"></span>
+        <span class="spacer" style="flex:1"></span>
+        <input class="input" id="stuSearch" style="max-width:200px;padding:8px 10px" data-i18n-ph="search">
+      </div>
+      <div class="card-b">
+        <p class="muted" style="font-size:13px;margin-top:0" data-i18n="students_help"></p>
+        <div style="overflow:auto">
+          <table class="table table-responsive"><thead><tr>
+            <th data-i18n="student"></th><th data-i18n="grade"></th><th data-i18n="parent"></th><th data-i18n="move_branch"></th>
+          </tr></thead><tbody id="stuBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Invite parents -->
   <section data-pane="invite" class="hidden">
     <div class="card pad">
@@ -69,6 +150,7 @@
         <div class="field"><label data-i18n="parent_email"></label><input class="input" type="email"></div>
         <div class="field"><label data-i18n="coparent_phone"></label><input class="input" placeholder="07xxxxxxxx"></div>
         <div class="field"><label data-i18n="coparent_email"></label><input class="input" type="email"></div>
+        <div class="field"><label data-i18n="parent_branch"></label><select class="input" id="inviteBranch"></select></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin:6px 0">
         <h4 style="margin:0;flex:1" data-i18n="children"></h4>
@@ -111,7 +193,7 @@
 3. The school may require gate security verification at its discretion.
 4. Override requests close 30 minutes before dismissal.
 5. All dismissal actions are logged for safety and auditing.</textarea>
-      <button class="btn btn-primary" style="margin-top:12px" onclick="SD.toast('Terms published to all parents','success')" data-i18n="save"></button>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="SD.toast('Terms published to all guardians/parents','success')" data-i18n="save"></button>
     </div>
   </section>
 </main>
@@ -162,15 +244,20 @@
   function bandOptions(sel){
     return SD.gradeBands().map(b=>"<option value='"+b.id+"' "+(b.id===sel?"selected":"")+">"+SD.bandName(b)+" · "+b.dismissal+"</option>").join("");
   }
+  function branchOptions(sel){
+    return SD.branches().map(b=>"<option value='"+b.id+"' "+(b.id===sel?"selected":"")+">"+SD.branchName(b)+"</option>").join("");
+  }
+  function fillBranchSelect(el,sel){if(el)el.innerHTML=branchOptions(sel);}
   function addKidRow(prefill){
     const rows=document.getElementById("kidRows");if(!rows)return;
     const id="kr"+(kidSeq++);
     const div=document.createElement("div");div.className="card pad";div.style.cssText="margin-bottom:10px;background:var(--navy-50)";div.dataset.kid=id;
     div.innerHTML=
-      "<div class='grid grid-3'>"+
+      "<div class='grid grid-4'>"+
         "<div class='field' style='margin:0'><label>"+SD.t("student_name")+"</label><input class='input k-name' placeholder='"+(SD.curLang()==="ar"?"مثال: بيسان جابر":"e.g. Bisan Jaber")+"' value='"+((prefill&&prefill.name)||"")+"'></div>"+
         "<div class='field' style='margin:0'><label>"+SD.t("student_id")+"</label><input class='input k-id' placeholder='S-1xxx' value='"+((prefill&&prefill.id)||"")+"'></div>"+
         "<div class='field' style='margin:0'><label>"+SD.t("dismissal_level")+"</label><select class='k-band'>"+bandOptions((prefill&&prefill.band)||"")+"</select></div>"+
+        "<div class='field' style='margin:0'><label>"+SD.t("branch")+"</label><select class='k-branch'>"+branchOptions((prefill&&prefill.branch)||"")+"</select></div>"+
       "</div>"+
       "<div style='text-align:end;margin-top:6px'><button type='button' class='btn btn-ghost k-remove' style='padding:4px 10px;font-size:13px;color:var(--alert)'>✕ "+SD.t("remove")+"</button></div>";
     div.querySelector(".k-remove").onclick=()=>div.remove();
@@ -181,10 +268,12 @@
 
   document.getElementById("sendInvite").onclick=()=>{
     const rows=[...document.querySelectorAll("#kidRows [data-kid]")];
+    const parentBranch=(document.getElementById("inviteBranch")||{}).value||(SD.branches()[0]||{}).id;
     const kids=rows.map(r=>({
       name:r.querySelector(".k-name").value.trim(),
       id:r.querySelector(".k-id").value.trim(),
-      band:r.querySelector(".k-band").value
+      band:r.querySelector(".k-band").value,
+      branch:(r.querySelector(".k-branch")||{}).value||parentBranch
     })).filter(k=>k.name);
     if(!kids.length){SD.toast(SD.curLang()==="ar"?"أضف طفلًا واحدًا على الأقل":"Add at least one child","warn");return;}
     // sample grade per band so each kid maps to the right dismissal level
@@ -192,14 +281,14 @@
     const st=SD.state();
     kids.forEach((k,i)=>{
       const sid=k.id||("S-"+Math.floor(1200+Math.random()*800));
-      st.students.push({id:sid,name_en:k.name,name_ar:k.name,grade:sampleGrade[k.band]||"5-A",method:"bus2",parent:"Invited Parent",status:"waiting"});
+      st.students.push({id:sid,name_en:k.name,name_ar:k.name,grade:sampleGrade[k.band]||"5-A",method:"bus2",parent:"Invited Parent",branchId:k.branch,status:"waiting"});
       st.audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",
-        event_en:"Invited child "+k.name+" ("+sid+", "+k.band+" band)",event_ar:"دعوة الطفل "+k.name+" ("+sid+"، مرحلة "+k.band+")",type:"info"});
+        event_en:"Invited child "+k.name+" ("+sid+", "+k.band+" band, "+SD.branchName(k.branch)+")",event_ar:"دعوة الطفل "+k.name+" ("+sid+"، مرحلة "+k.band+"، "+SD.branchName(k.branch)+")",type:"info"});
     });
-    SD.save();renderQR();
-    const list=kids.map(k=>{const b=SD.gradeBands().find(x=>x.id===k.band);return "<li>"+k.name+(k.id?(" · "+k.id):"")+" — "+SD.bandName(b)+" ("+SD.t("dismissal_time")+" "+b.dismissal+")</li>";}).join("");
+    SD.save();renderQR();renderStudents();
+    const list=kids.map(k=>{const b=SD.gradeBands().find(x=>x.id===k.band);return "<li>"+k.name+(k.id?(" · "+k.id):"")+" — "+SD.bandName(b)+" · "+SD.branchName(k.branch)+"</li>";}).join("");
     SD.modal({title:SD.t("send_invite"),
-      body:"<p>"+(SD.curLang()==="ar"?"تم إرسال دعوات SMS/بريد إلى ولي الأمر والشريك، وإنشاء حسابات الأبناء التالية برموز QR:":"SMS/email invitations sent to parent &amp; co-parent. The following children were created with onboarding QR codes:")+"</p><ul style='margin:6px 0 10px;padding-inline-start:18px'>"+list+"</ul><div class='qr'>"+SD.qrSvg("invite-"+Date.now())+"</div>",
+      body:"<p>"+(SD.curLang()==="ar"?"تم إرسال دعوات SMS/بريد إلى ولي الأمر1 وولي الأمر2، وإنشاء حسابات الأبناء التالية برموز QR:":"SMS/email invitations sent to guardian/parent &amp; guardian/parent2. The following children were created with onboarding QR codes:")+"</p><ul style='margin:6px 0 10px;padding-inline-start:18px'>"+list+"</ul><div class='qr'>"+SD.qrSvg("invite-"+Date.now())+"</div>",
       buttons:[{label:SD.t("close"),class:"btn-primary"}]});
     document.getElementById("kidRows").innerHTML="";addKidRow();
   };
@@ -242,7 +331,141 @@
     const map={schoolName:"school_name",schoolCity:"school_city",schoolPhone:"school_phone",schoolAddr:"school_city"};
     Object.keys(map).forEach(id=>{const el=document.getElementById(id);if(el)el.value=SD.t(map[id]);});
   }
-  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();setSchoolFields();}
+
+  /* ---- Branches management ---- */
+  function renderBranches(){
+    const body=document.getElementById("brBody");if(!body)return;body.innerHTML="";
+    const st=SD.state();
+    SD.branches().forEach(b=>{
+      const count=st.students.filter(s=>s.branchId===b.id).length;
+      const adm=SD.adminsForBranch(b.id).map(a=>SD.adminName(a)).join(", ")||"—";
+      const tr=document.createElement("tr");
+      tr.innerHTML="<td data-label='"+SD.t("branch_name")+"'><strong>"+SD.branchName(b)+"</strong></td>"+
+        "<td data-label='"+SD.t("branch_phone")+"'>"+b.phone+"</td>"+
+        "<td data-label='"+SD.t("total_students")+"'>"+count+"</td>"+
+        "<td data-label='"+SD.t("tab_admins")+"'>"+adm+"</td>";
+      body.appendChild(tr);
+    });
+  }
+  const addBranchBtn=document.getElementById("addBranch");
+  if(addBranchBtn)addBranchBtn.onclick=()=>{
+    const n=document.getElementById("brName").value.trim(),p=document.getElementById("brPhone").value.trim();
+    if(!n||!p){SD.toast(SD.t("branch_required"),"warn");return;}
+    const id=SD.addBranch(n,p);
+    SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Added branch "+n+" ("+p+")",event_ar:"إضافة فرع "+n+" ("+p+")",type:"info"});SD.save();
+    document.getElementById("brName").value="";document.getElementById("brPhone").value="";
+    refreshBranchSelects();renderBranches();renderAdmins();renderStudents();
+    SD.toast(SD.t("branch_saved")+": "+n,"success");
+  };
+
+  /* ---- Admins management ---- */
+  function renderAdmins(){
+    const body=document.getElementById("adBody");if(!body)return;body.innerHTML="";
+    SD.admins().forEach(a=>{
+      const tr=document.createElement("tr");
+      const sel="<select data-admin='"+a.id+"'>"+branchOptions(a.branchId)+"</select>";
+      tr.innerHTML="<td data-label='"+SD.t("admin_name")+"'><strong>"+SD.adminName(a)+"</strong></td>"+
+        "<td data-label='"+SD.t("admin_phone")+"'>"+a.phone+"</td>"+
+        "<td data-label='"+SD.t("move_branch")+"'>"+sel+"</td>";
+      const s=tr.querySelector("select");
+      s.onchange=()=>{SD.moveAdmin(a.id,s.value);
+        SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Moved admin "+a.name_en+" to "+SD.branchName(s.value),event_ar:"نقل المسؤول "+a.name_en+" إلى "+SD.branchName(s.value),type:"info"});SD.save();
+        renderBranches();SD.toast(SD.adminName(a)+" → "+SD.branchName(s.value),"success");};
+      body.appendChild(tr);
+    });
+  }
+  const addAdminBtn=document.getElementById("addAdmin");
+  if(addAdminBtn)addAdminBtn.onclick=()=>{
+    const n=document.getElementById("adName").value.trim(),p=document.getElementById("adPhone").value.trim(),br=document.getElementById("adBranch").value;
+    if(!n||!p){SD.toast(SD.t("admin_required"),"warn");return;}
+    SD.addAdmin(n,p,br);
+    SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Created admin "+n+" → "+SD.branchName(br),event_ar:"إنشاء مسؤول "+n+" → "+SD.branchName(br),type:"info"});SD.save();
+    document.getElementById("adName").value="";document.getElementById("adPhone").value="";
+    renderAdmins();renderBranches();
+    SD.toast(SD.t("admin_created")+": "+n,"success");
+  };
+
+  /* ---- Students: branch assignment / move ---- */
+  function renderStudents(){
+    const body=document.getElementById("stuBody");if(!body)return;body.innerHTML="";
+    const q=((document.getElementById("stuSearch")||{}).value||"").toLowerCase();
+    const list=SD.state().students.filter(s=>!q||(s.name_en+" "+s.name_ar+" "+s.grade+" "+s.parent).toLowerCase().indexOf(q)>-1);
+    if(!list.length){body.innerHTML="<tr><td colspan='4' class='muted'>"+SD.t("no_students")+"</td></tr>";return;}
+    list.forEach(s=>{
+      const tr=document.createElement("tr");
+      const sel="<select data-stu='"+s.id+"'>"+branchOptions(s.branchId)+"</select>";
+      tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.id+"</div></td>"+
+        "<td data-label='"+SD.t("grade")+"'>"+s.grade+"</td>"+
+        "<td data-label='"+SD.t("parent")+"'>"+SD.personName(s.parent)+"</td>"+
+        "<td data-label='"+SD.t("move_branch")+"'>"+sel+"</td>";
+      const dd=tr.querySelector("select");
+      dd.onchange=()=>{SD.moveStudent(s.id,dd.value);
+        SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Moved "+s.name_en+" to "+SD.branchName(dd.value),event_ar:"نقل "+s.name_ar+" إلى "+SD.branchName(dd.value),type:"info"});SD.save();
+        renderBranches();SD.toast(SD.studentName(s)+" → "+SD.branchName(dd.value),"success");};
+      body.appendChild(tr);
+    });
+  }
+  const stuSearch=document.getElementById("stuSearch");if(stuSearch)stuSearch.oninput=renderStudents;
+
+  /* ---- Classes & classroom display (per-branch) ---- */
+  function renderBranchFeatures(){
+    const wrap=document.getElementById("branchFeatureList");if(!wrap)return;wrap.innerHTML="";
+    SD.branches().forEach(b=>{
+      const row=document.createElement("div");
+      row.className="card pad";row.style.cssText="display:flex;align-items:center;gap:12px;margin-bottom:10px;background:var(--navy-50)";
+      const on=!!b.classesEnabled;
+      row.innerHTML="<div style='flex:1'><strong>"+SD.branchName(b)+"</strong>"+
+        "<div class='muted' style='font-size:12px'>"+SD.t("classroom_display")+" · "+SD.classesForBranch(b.id).length+" "+SD.t("tab_classes")+"</div></div>"+
+        "<span class='badge "+(on?"badge-green":"badge-red")+"'>"+(on?SD.t("feature_on"):SD.t("feature_off"))+"</span>";
+      const btn=document.createElement("button");btn.className="btn "+(on?"btn-ghost":"btn-success");btn.textContent=on?SD.t("feature_off"):SD.t("feature_on");
+      btn.onclick=()=>{SD.setBranchClasses(b.id,!on);
+        SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Classroom display "+(!on?"enabled":"disabled")+" for "+b.name_en,event_ar:"عرض الصف "+(!on?"مفعّل":"معطّل")+" لـ "+b.name_en,type:"info"});SD.save();
+        renderBranchFeatures();renderClassStudents();SD.toast(SD.branchName(b)+" · "+(!on?SD.t("feature_on"):SD.t("feature_off")),!on?"success":"warn");};
+      row.appendChild(btn);wrap.appendChild(row);
+    });
+  }
+  const addClassBtn=document.getElementById("addClass");
+  if(addClassBtn)addClassBtn.onclick=()=>{
+    const n=document.getElementById("clName").value.trim(),br=document.getElementById("clBranch").value;
+    if(!n){SD.toast(SD.curLang()==="ar"?"أدخل اسم الفصل":"Enter a class name","warn");return;}
+    SD.addClass(n,br);
+    SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Added class "+n+" → "+SD.branchName(br),event_ar:"إضافة فصل "+n+" → "+SD.branchName(br),type:"info"});SD.save();
+    document.getElementById("clName").value="";
+    renderBranchFeatures();renderClassStudents();
+    SD.toast(SD.t("class_added")+": "+n,"success");
+  };
+  function classOptionsFor(branchId,sel){
+    const list=SD.classesForBranch(branchId);
+    return "<option value=''>"+SD.t("no_class")+"</option>"+list.map(c=>"<option value='"+c.id+"' "+(c.id===sel?"selected":"")+">"+SD.className(c)+"</option>").join("");
+  }
+  function renderClassStudents(){
+    const body=document.getElementById("clStuBody");if(!body)return;body.innerHTML="";
+    const list=SD.state().students;
+    list.forEach(s=>{
+      const enabled=SD.branchClassesEnabled(s.branchId);
+      const tr=document.createElement("tr");
+      const cell=enabled
+        ? "<select data-cl='"+s.id+"'>"+classOptionsFor(s.branchId,s.classId)+"</select>"
+        : "<span class='muted' style='font-size:12px'>"+SD.t("classes_disabled_branch")+"</span>";
+      tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.id+"</div></td>"+
+        "<td data-label='"+SD.t("grade")+"'>"+s.grade+"</td>"+
+        "<td data-label='"+SD.t("branch")+"'>"+SD.branchName(s.branchId)+"</td>"+
+        "<td data-label='"+SD.t("link_class")+"'>"+cell+"</td>";
+      const dd=tr.querySelector("select");
+      if(dd)dd.onchange=()=>{SD.setStudentClass(s.id,dd.value);
+        SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Linked "+s.name_en+" to "+(dd.value?SD.className(dd.value):"no class"),event_ar:"ربط "+s.name_ar+" بـ "+(dd.value?SD.className(dd.value):"بدون فصل"),type:"info"});SD.save();
+        SD.toast(SD.studentName(s)+" → "+(dd.value?SD.className(dd.value):SD.t("no_class")),"success");};
+      body.appendChild(tr);
+    });
+  }
+
+  function refreshBranchSelects(){
+    fillBranchSelect(document.getElementById("inviteBranch"));
+    fillBranchSelect(document.getElementById("adBranch"));
+    fillBranchSelect(document.getElementById("clBranch"));
+  }
+
+  function renderAll(){renderSecurity();renderQR();renderAudit();renderBandSetup();setSchoolFields();refreshBranchSelects();renderBranches();renderAdmins();renderStudents();renderBranchFeatures();renderClassStudents();}
   const af=document.getElementById("auditFilter");if(af)af.oninput=renderAudit;
   const ec=document.getElementById("exportCsv");if(ec)ec.onclick=exportCsv;
   addKidRow();

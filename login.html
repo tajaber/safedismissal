@@ -58,8 +58,8 @@
 (function(){
   const params=new URLSearchParams(location.search);
   const role=params.get("role")||"parent";
-  const dest={moderator:"moderator.html",admin:"admin.html",parent:"parent.html",security:"security.html"}[role]||"parent.html";
-  const roleKey={moderator:"role_moderator",admin:"role_admin",parent:"role_parent",security:"role_security"}[role];
+  const dest={moderator:"moderator.html",admin:"admin.html",parent:"parent.html",security:"security.html",teacher:"teacher.html"}[role]||"parent.html";
+  const roleKey={moderator:"role_moderator",admin:"role_admin",parent:"role_parent",security:"role_security",teacher:"role_teacher"}[role];
 
   function paintRole(){document.getElementById("roleLine").textContent=SD.t(roleKey);}
   document.addEventListener("langchange",paintRole);

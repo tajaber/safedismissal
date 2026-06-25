@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeDismiss — Teacher / Classroom</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-role="Teacher / Classroom">
+<div class="app-shell">
+<div data-chrome="top"></div>
+
+<main id="main" class="container section">
+  <h1 class="page-title" data-i18n="teacher_dash"></h1>
+  <p class="page-sub" data-i18n="teacher_sub"></p>
+
+  <div class="card pad" style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-size:24px">🍎</div>
+    <div class="field" style="margin:0;flex:1;min-width:220px">
+      <label data-i18n="select_class"></label>
+      <select id="classSelect"></select>
+    </div>
+  </div>
+
+  <div id="noClasses" class="card pad center hidden">
+    <div style="font-size:34px">🏫</div>
+    <p class="muted" data-i18n="no_class_branches"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <span id="boardTitle"></span>
+      <span class="spacer" style="flex:1"></span>
+      <span class="badge badge-green" id="boardCount"></span>
+    </div>
+    <div class="card-b" id="board"></div>
+  </div>
+</main>
+
+<div data-chrome="foot"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  function enabledClasses(){
+    return SD.classes().filter(c=>SD.branchClassesEnabled(c.branchId));
+  }
+  function fillClasses(){
+    const sel=document.getElementById("classSelect");
+    const list=enabledClasses();
+    const noBox=document.getElementById("noClasses");
+    if(!list.length){
+      sel.innerHTML="";
+      noBox.classList.remove("hidden");
+    }else{
+      noBox.classList.add("hidden");
+      const cur=sel.value;
+      sel.innerHTML=list.map(c=>"<option value='"+c.id+"'>"+SD.className(c)+" · "+SD.branchName(c.branchId)+"</option>").join("");
+      if(cur&&list.some(c=>c.id===cur))sel.value=cur;
+    }
+  }
+  function renderBoard(){
+    const sel=document.getElementById("classSelect");
+    const cls=SD.classById(sel.value);
+    const board=document.getElementById("board");
+    const title=document.getElementById("boardTitle");
+    const count=document.getElementById("boardCount");
+    if(!cls){title.textContent="";count.textContent="";board.innerHTML="";return;}
+    title.textContent=SD.className(cls)+" · "+SD.branchName(cls.branchId);
+    const feed=SD.classFeed(cls.id);
+    count.textContent=feed.length+"";
+    if(!feed.length){board.innerHTML="<p class='muted'>"+SD.t("feed_empty")+"</p>";return;}
+    board.innerHTML="";
+    feed.forEach(f=>{
+      const s=f.student;
+      const row=document.createElement("div");
+      row.className="card pad";row.style.cssText="display:flex;align-items:center;gap:12px;margin-bottom:10px";
+      const tag=f.overrideApproved
+        ? "<span class='badge badge-green'>🚗 "+SD.t("feed_override")+"</span>"
+        : "<span class='badge badge-amber'>🏃 "+SD.t("feed_announced")+"</span>";
+      row.innerHTML="<div style='width:42px;height:42px;border-radius:12px;background:var(--navy-50);display:grid;place-items:center;font-size:20px'>🎒</div>"+
+        "<div style='flex:1'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:13px'>"+SD.t("grade")+" "+s.grade+" · "+s.id+"</div></div>"+
+        tag;
+      board.appendChild(row);
+    });
+  }
+  function renderAll(){fillClasses();renderBoard();}
+  document.getElementById("classSelect").onchange=renderBoard;
+  document.addEventListener("langchange",renderAll);
+  document.addEventListener("sdsync",renderAll);
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(renderAll,0));
+})();
+</script>
+</body>
+</html>

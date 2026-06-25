@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SafeDismiss — Parent</title>
+<title>SafeDismiss — Guardian/Parent</title>
 <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body data-role="Parent / Co-Parent">
+<body data-role="Guardian/Parent / Guardian/Parent2">
 <div class="app-shell">
 <div data-chrome="top"></div>
 
@@ -62,7 +62,15 @@
   };
 
   function methodIsCar(m){return m==="car";}
-  function arrivalEnabled(m){return m==="car"||m==="bus1a";}
+  function arrivalEnabled(s){
+    if(s.method==="car")return true;
+    if(s.method==="bus1a"){
+      // Afternoon-only bus: announce is hidden until an override is approved for THIS kid.
+      const today=SD.dateStr();
+      return SD.state().overrides.some(o=>o.student===s.name_en&&o.status==="approved"&&(o.date===today||!o.date));
+    }
+    return false;
+  }
 
   function fmtLeft(ms){
     if(ms<=0)return "0:00";
@@ -79,26 +87,30 @@
     const wrap=document.getElementById("kids");wrap.innerHTML="";
     kids.forEach(s=>{
       const c=document.createElement("div");c.className="card pad";c.style.marginBottom="14px";
-      const canAnnounce=arrivalEnabled(s.method);
+      const canAnnounce=arrivalEnabled(s);
+      // bus1a without an approved override hides the Announce button entirely (per policy).
+      const announceHidden=(s.method==="bus1a"||s.method==="bus1m"||s.method==="bus2")&&!canAnnounce;
       // Each kid's override window is computed from ITS OWN grade band's dismissal time.
       const od=SD.overrideInfoFor(s);
+      const br=SD.studentBranch(s);
       const bandLine="<span class='badge badge-navy' style='margin-top:6px'>"+SD.bandName(od.band)+" · "+SD.t("dismissal_time")+" "+SD.fmtTime(od.band.dismissal)+"</span>";
+      const branchLine=br?"<span class='badge badge-green' style='margin-top:6px;margin-inline-start:6px'>📍 "+SD.branchName(br)+"</span>":"";
       const ovLine=od.open
         ? "<div class='muted' style='font-size:12px;margin:8px 0 0'>⏳ "+SD.t("override_closes")+" "+fmtLeft(od.msLeft)+" ("+SD.t("cutoff_label")+" "+SD.fmtTime(od.deadline.toTimeString().slice(0,5))+")</div>"
-        : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked")+"</div>";
+        : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked").replace("0791234567",(br?br.phone:"0791234567"))+"</div>";
       c.innerHTML=
         "<div style='display:flex;align-items:center;gap:10px'>"+
           "<div style='width:42px;height:42px;border-radius:12px;background:var(--navy-50);display:grid;place-items:center;font-size:20px'>🎒</div>"+
           "<div style='flex:1'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:13px'>"+SD.t("grade")+" "+s.grade+" · "+s.id+"</div></div>"+
           SD.statusBadge(s.status)+
         "</div>"+
-        "<div style='margin-top:8px'>"+bandLine+"</div>"+
+        "<div style='margin-top:8px'>"+bandLine+branchLine+"</div>"+
         "<div class='field' style='margin-top:12px'><label>"+SD.t("method")+"</label>"+
           "<select data-k='"+s.id+"'>"+
             opt("bus2",s.method)+opt("bus1m",s.method)+opt("bus1a",s.method)+opt("car",s.method)+
           "</select></div>"+
         "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+
-          "<button class='btn "+(canAnnounce?"btn-success btn-glow":"btn-ghost")+"' data-announce='"+s.id+"' "+(canAnnounce?"":"disabled")+" style='flex:1'>"+SD.t("announce_arrival")+"</button>"+
+          (announceHidden?"":"<button class='btn "+(canAnnounce?"btn-success btn-glow":"btn-ghost")+"' data-announce='"+s.id+"' "+(canAnnounce?"":"disabled")+" style='flex:1'>"+SD.t("announce_arrival")+"</button>")+
         "</div>"+
         "<div style='display:flex;gap:8px;margin-top:8px;flex-wrap:wrap'>"+
           "<button class='btn btn-ghost' data-override='"+s.id+"' "+(od.open?"":"disabled")+" style='flex:1'>"+SD.t("request_override")+"</button>"+
@@ -125,7 +137,7 @@
         document.querySelector("[data-lane='"+id+"']").classList.remove("hidden");
         SD.notify(actor().name+" announced arrival for "+s.name_en+" — please pull into Lane A",
           SD.personName(actor().name)+" أعلن وصول "+s.name_ar+" — تقدّم إلى المسار A","success");
-        SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Co-Parent · ":"Parent · ")+actor().name,
+        SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Guardian/Parent2 · ":"Guardian/Parent · ")+actor().name,
           event_en:"Announced arrival for "+s.name_en,event_ar:"إعلان وصول لـ "+s.name_ar,type:"info"});
         SD.save();
       };
@@ -134,17 +146,28 @@
       btn.onclick=()=>{
         const s=SD.state().students.find(x=>x.id===btn.dataset.override);
         const od=SD.overrideInfoFor(s);
-        if(!od.open){SD.modal({title:SD.t("request_override"),body:"<p style='color:var(--alert)'>"+SD.t("override_blocked")+"</p>",buttons:[{label:SD.t("close"),class:"btn-danger"}]});return;}
+        const br=SD.studentBranch(s);
+        const branchPhone=br?br.phone:"0791234567";
+        if(!od.open){SD.modal({title:SD.t("request_override"),body:"<p style='color:var(--alert)'>"+SD.t("override_blocked").replace("0791234567",branchPhone)+"</p>",buttons:[{label:SD.t("close"),class:"btn-danger"}]});return;}
+        const branchBox=br?("<div class='card pad' style='margin:10px 0;background:var(--navy-50)'>"+
+              "<div class='muted' style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px'>"+SD.t("branch_location")+"</div>"+
+              "<strong>📍 "+SD.branchName(br)+"</strong> · "+branchPhone+"</div>"):"";
         SD.modal({title:SD.t("request_override"),
           body:"<p>"+(SD.curLang()==="ar"?"تغيير طريقة الانصراف إلى السيارة لـ ":"Switch dismissal to Car pick-up for ")+"<strong>"+SD.studentName(s)+"</strong>?</p>"+
+               branchBox+
                "<p class='muted' style='font-size:13px'>"+SD.bandName(od.band)+" · "+SD.t("dismissal_time")+" "+SD.fmtTime(od.band.dismissal)+"</p>",
           buttons:[
             {label:SD.t("cancel"),class:"btn-ghost"},
             {label:SD.t("submit"),class:"btn-primary",onClick:()=>{
               const exists=SD.state().overrides.find(o=>o.student===s.name_en&&o.status==="pending");
-              if(!exists){SD.state().overrides.push({id:"OV-"+Math.floor(Math.random()*900+100),student:s.name_en,from:s.method,to:"car",status:"pending",time:now(),date:SD.dateStr()});}
-              SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Co-Parent · ":"Parent · ")+actor().name,event_en:"Requested car override for "+s.name_en,event_ar:"طلب استثناء بالسيارة لـ "+s.name_ar,type:"pending"});
-              SD.save();SD.notify("Car override requested for "+s.name_en+" by "+actor().name+" — awaiting school approval","طلب استثناء بالسيارة لـ "+s.name_ar+" بواسطة "+SD.personName(actor().name)+" — بانتظار موافقة المدرسة","");
+              if(!exists){SD.state().overrides.push({id:"OV-"+Math.floor(Math.random()*900+100),student:s.name_en,from:s.method,to:"car",status:"pending",time:now(),date:SD.dateStr(),branch:s.branchId});}
+              const admins=SD.adminsForBranch(s.branchId);
+              const adminNames=admins.map(a=>a.name_en).join(", ")||"branch admins";
+              const adminNamesAr=admins.map(a=>a.name_ar).join("، ")||"مسؤولي الفرع";
+              SD.state().audit.unshift({time:now(),actor:(actor().role==="coparent"?"Guardian/Parent2 · ":"Guardian/Parent · ")+actor().name,event_en:"Requested car override for "+s.name_en+" ("+SD.branchName(br)+")",event_ar:"طلب استثناء بالسيارة لـ "+s.name_ar+" ("+SD.branchName(br)+")",type:"pending"});
+              SD.save();
+              SD.notify("Car override for "+s.name_en+" sent to "+SD.branchName(br)+" — "+SD.t("notified_admins")+": "+adminNames,
+                "طلب استثناء بالسيارة لـ "+s.name_ar+" أُرسل إلى "+SD.branchName(br)+" — "+SD.t("notified_admins")+": "+adminNamesAr,"");
             }}
           ]});
       };

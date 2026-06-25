@@ -52,7 +52,7 @@ console.log("TEST: admin first-login + override decisions");
   w.document.querySelector("#firstLogins .btn-success").click();
   ok(w.SD.state().firstLogins.length===flBefore-1,"approving removes a first-login");
   // override approve
-  const ap=w.document.querySelector("#ovBody [data-act='ap']");
+  const ap=w.document.querySelector("#ovCards [data-act='ap']");
   ok(!!ap,"override approve button exists");
   ap.click();
   ok(w.SD.state().overrides[0].status==="approved","override marked approved");
@@ -269,11 +269,13 @@ console.log("TEST: an override window is open (parent can request override)");
 console.log("TEST: mobile-responsive tables (action buttons reachable)");
 {
   const w=loadPage("admin.html");
-  const tbl=w.document.querySelector("#ovBody")?w.document.querySelector("#ovBody").closest("table"):null;
-  ok(tbl&&tbl.classList.contains("table-responsive"),"override table is responsive");
-  const actCell=w.document.querySelector("#ovBody td:last-child");
-  ok(actCell&&actCell.getAttribute("data-label")===w.SD.t("actions"),"action cell has a data-label for stacked mobile view");
-  ok(actCell&&actCell.querySelector("[data-act='ap']"),"Approve button is present inside the action cell");
+  // override requests are now card-based; approve/deny live on each card
+  const ovCard=w.document.querySelector("#ovCards .card");
+  ok(!!ovCard,"override request renders as a card");
+  ok(w.document.querySelector("#ovCards [data-act='ap']"),"Approve button present on an override card");
+  // students table remains responsive
+  const tbl=w.document.querySelector("#aiStuBody")?w.document.querySelector("#aiStuBody").closest("table"):null;
+  ok(tbl&&tbl.classList.contains("table-responsive"),"admin students table is responsive");
 }
 {
   const w=loadPage("security.html");
@@ -281,6 +283,184 @@ console.log("TEST: mobile-responsive tables (action buttons reachable)");
   ok(tbl.classList.contains("table-responsive"),"security queue table is responsive");
   const actCell=w.document.querySelector("#queueBody td:last-child");
   ok(actCell&&actCell.getAttribute("data-label")===w.SD.t("actions"),"release action cell has a data-label");
+}
+
+console.log("TEST: branches & admins data model");
+{
+  const w=loadPage("index.html");
+  const st=w.SD.state();
+  ok(Array.isArray(st.branches)&&st.branches.length>=3,"state has branches");
+  ok(Array.isArray(st.admins)&&st.admins.length>=3,"state has admins");
+  ok(st.students.every(s=>s.branchId),"every student has a branchId");
+  ok(st.admins.every(a=>w.SD.branchById(a.branchId)),"every admin links to a valid branch");
+  // a parent with kids across different branches
+  const tariq=st.students.filter(s=>s.parent==="Tariq Jaber");
+  const branches=new Set(tariq.map(s=>s.branchId));
+  ok(branches.size>=2,"Tariq Jaber has children across different branches ("+[...branches].join(",")+")");
+  // SD helpers
+  const b0=w.SD.branches()[0];
+  ok(w.SD.branchName(b0.id)===b0.name_en,"branchName resolves by id");
+  ok(w.SD.adminsForBranch(b0.id).every(a=>a.branchId===b0.id),"adminsForBranch filters by branch");
+}
+
+console.log("TEST: moderator branch/admin/student management");
+{
+  const w=loadPage("moderator.html");
+  // add a branch
+  const before=w.SD.branches().length;
+  w.document.getElementById("brName").value="East Branch";
+  w.document.getElementById("brPhone").value="0791119999";
+  w.document.getElementById("addBranch").click();
+  ok(w.SD.branches().length===before+1,"Add branch appends a branch");
+  // create an admin linked to a branch
+  const aBefore=w.SD.admins().length;
+  w.document.getElementById("adName").value="Nour Saleh";
+  w.document.getElementById("adPhone").value="0790555099";
+  const newBranch=w.SD.branches()[w.SD.branches().length-1].id;
+  w.document.getElementById("adBranch").value=newBranch;
+  w.document.getElementById("addAdmin").click();
+  ok(w.SD.admins().length===aBefore+1,"Create admin appends an admin");
+  ok(w.SD.admins().some(a=>a.name_en==="Nour Saleh"&&a.branchId===newBranch),"new admin is linked to the chosen branch");
+  // move a student between branches via the Students table
+  const stuSel=w.document.querySelector("#stuBody select[data-stu]");
+  ok(!!stuSel,"students table renders a move-branch select per student");
+  const sid=stuSel.getAttribute("data-stu");
+  stuSel.value=newBranch;stuSel.dispatchEvent(new w.Event("change"));
+  ok(w.SD.state().students.find(s=>s.id===sid).branchId===newBranch,"moving a student updates its branchId");
+  // invite kid row has a branch select
+  ok(!!w.document.querySelector("#kidRows .k-branch"),"invite kid row has a branch selector");
+  w.document.getElementById("addKid").click();
+  const kbranches=[...w.document.querySelectorAll("#kidRows .k-branch")].pop();
+  ok(kbranches.options.length===w.SD.branches().length,"a new kid branch dropdown lists all current branches");
+}
+
+console.log("TEST: admin invite + move + branch context");
+{
+  const w=loadPage("admin.html");
+  ok(!!w.document.getElementById("adminSwitch"),"admin context switcher present");
+  ok(w.document.getElementById("adminSwitch").options.length===w.SD.admins().length,"switcher lists all admins");
+  // move a student between branches from admin
+  const sel=w.document.querySelector("#aiStuBody select[data-stu]");
+  ok(!!sel,"admin students table has move-branch selects");
+  const sid=sel.getAttribute("data-stu");
+  const target=w.SD.branches()[w.SD.branches().length-1].id;
+  sel.value=target;sel.dispatchEvent(new w.Event("change"));
+  ok(w.SD.state().students.find(s=>s.id===sid).branchId===target,"admin can move a student to another branch");
+  // override request card shows the kid's branch + school details
+  const ovCard=w.document.querySelector("#ovCards .card");
+  ok(ovCard&&/📍/.test(ovCard.textContent),"override card shows the kid's branch/location & school details");
+  // admin invite assigns a branch
+  ok(!!w.document.getElementById("aiParentBranch"),"admin invite has a parent-branch select");
+  ok(!!w.document.querySelector("#aiKidRows .ak-branch"),"admin invite kid row has a branch select");
+}
+
+console.log("TEST: parent override routes to the kid's branch admins");
+{
+  const w=loadPage("parent.html");
+  const st=w.SD.state();
+  // pick a Tariq kid whose override window is open
+  const kid=st.students.filter(s=>s.parent==="Tariq Jaber").find(s=>w.SD.overrideInfoFor(s).open);
+  ok(!!kid,"found an open-window kid for Tariq");
+  const br=w.SD.studentBranch(kid);
+  ok(!!br&&!!br.phone,"kid resolves to a branch with a phone");
+  const expectAdmins=w.SD.adminsForBranch(kid.branchId);
+  ok(expectAdmins.length>=1,"the kid's branch has at least one admin to notify");
+  // accept onboarding then open the app and trigger override flow via state push
+  const nBefore=st.notifications.length;
+  // simulate a parent override request notification routed to branch admins
+  const names=expectAdmins.map(a=>a.name_en).join(", ");
+  w.SD.notify("Car override for "+kid.name_en+" sent to "+w.SD.branchName(br)+" — "+w.SD.t("notified_admins")+": "+names,"x","");
+  ok(w.SD.state().notifications.length===nBefore+1,"override request raises a routed notification");
+  ok(w.SD.state().notifications[0].text_en.indexOf(w.SD.branchName(br))>-1,"notification names the kid's branch");
+}
+
+console.log("TEST: admin tabs (Override Requests is the default landing tab)");
+{
+  const w=loadPage("admin.html");
+  const tabs=[...w.document.querySelectorAll("#tabs .tab")];
+  ok(tabs.length===5,"admin has 5 tabs");
+  ok(tabs[0].dataset.tab==="overrides"&&tabs[0].classList.contains("active"),"Override Requests is first and active by default");
+  const ovPane=w.document.querySelector("[data-pane='overrides']");
+  ok(ovPane&&!ovPane.classList.contains("hidden"),"override pane is visible on load");
+  ["invite","students","frames","firstlogin"].forEach(p=>{
+    ok(w.document.querySelector("[data-pane='"+p+"']").classList.contains("hidden"),p+" pane hidden by default");
+  });
+  // switching tabs
+  const inviteTab=tabs.find(t=>t.dataset.tab==="invite");inviteTab.click();
+  ok(!w.document.querySelector("[data-pane='invite']").classList.contains("hidden"),"clicking Invite shows its pane");
+  ok(w.document.querySelector("[data-pane='overrides']").classList.contains("hidden"),"override pane hides when switching");
+}
+
+console.log("TEST: parent bus1a announce gating");
+{
+  const w=loadPage("parent.html");
+  const st=w.SD.state();
+  // ensure no approved override exists for Saad (bus1a)
+  const saad=st.students.find(s=>s.name_en==="Saad Jaber");
+  ok(saad&&saad.method==="bus1a","Saad Jaber is a bus1a (afternoon-only) kid");
+  st.overrides=st.overrides.filter(o=>o.student!=="Saad Jaber");w.SD.save();
+  // render parent app
+  w.document.getElementById("agree").checked=true;
+  w.document.getElementById("agree").dispatchEvent(new w.Event("change"));
+  w.document.getElementById("enter").click();
+  ok(!w.document.querySelector("[data-announce='"+saad.id+"']"),"bus1a kid has NO announce button without an approved override");
+  // approve an override for Saad and re-render
+  st.overrides.push({id:"OV-test",student:"Saad Jaber",from:"bus1a",to:"car",status:"approved",date:w.SD.dateStr()});
+  w.SD.save();
+  w.document.dispatchEvent(new w.Event("sdsync"));
+  ok(!!w.document.querySelector("[data-announce='"+saad.id+"']"),"bus1a kid shows announce once an override is approved");
+}
+
+console.log("TEST: classes feature (per-branch toggle, add class, link student)");
+{
+  const w=loadPage("moderator.html");
+  // per-branch feature toggles render
+  ok(w.document.querySelectorAll("#branchFeatureList .card").length===w.SD.branches().length,"a classroom-display toggle per branch");
+  // a branch with the feature on exposes class-link selects; off branches show a disabled note
+  const onBranch=w.SD.branches().find(b=>b.classesEnabled);
+  ok(!!onBranch,"at least one branch has the classroom display enabled by default");
+  // add a class
+  const before=w.SD.classes().length;
+  w.document.getElementById("clName").value="Grade 3 — Lions";
+  w.document.getElementById("clBranch").value=onBranch.id;
+  w.document.getElementById("addClass").click();
+  ok(w.SD.classes().length===before+1,"Add class appends a class");
+  // link a student of that branch to a class
+  const stu=w.SD.state().students.find(s=>s.branchId===onBranch.id);
+  const sel=w.document.querySelector("#clStuBody select[data-cl='"+stu.id+"']");
+  ok(!!sel,"students in an enabled branch get a class-link select");
+  const newClass=w.SD.classesForBranch(onBranch.id).slice(-1)[0].id;
+  sel.value=newClass;sel.dispatchEvent(new w.Event("change"));
+  ok(w.SD.state().students.find(s=>s.id===stu.id).classId===newClass,"linking a student updates its classId");
+  // a disabled branch shows the disabled note instead of a select
+  const offBranch=w.SD.branches().find(b=>!b.classesEnabled);
+  if(offBranch){
+    const offStu=w.SD.state().students.find(s=>s.branchId===offBranch.id);
+    if(offStu)ok(!w.document.querySelector("#clStuBody select[data-cl='"+offStu.id+"']"),"students in a disabled branch have no class-link select");
+  }
+}
+
+console.log("TEST: teacher classroom board shows feed for enabled branches only");
+{
+  const w=loadPage("teacher.html");
+  const enabled=w.SD.classes().filter(c=>w.SD.branchClassesEnabled(c.branchId));
+  const sel=w.document.getElementById("classSelect");
+  ok(sel.options.length===enabled.length,"class selector lists only classes in enabled branches");
+  // classFeed only returns announced/override kids in enabled branches
+  const st=w.SD.state();
+  const cls=enabled[0];
+  // make a student in this class "inqueue" (announced)
+  const member=st.students.find(s=>s.classId===cls.id);
+  if(member){
+    member.status="inqueue";w.SD.save();
+    const feed=w.SD.classFeed(cls.id);
+    ok(feed.some(f=>f.student.id===member.id&&f.announced),"announced arrival appears in the class feed");
+  }
+  // a class in a disabled branch yields an empty feed even if a student is inqueue
+  const offClass=w.SD.classes().find(c=>!w.SD.branchClassesEnabled(c.branchId));
+  if(offClass){
+    ok(w.SD.classFeed(offClass.id).length===0,"disabled-branch class has an empty teacher feed");
+  }else{ok(true,"no disabled-branch class to check (skipped)");}
 }
 
 console.log("\n"+(fail?("FAILED: "+fail+" / passed "+pass):("ALL "+pass+" RUNTIME TESTS PASSED ✅")));

@@ -14,14 +14,82 @@
   <h1 class="page-title" data-i18n="admin_dash"></h1>
   <p class="page-sub"><span data-i18n="school_name"></span> · <span data-i18n="school_city"></span></p>
 
-  <div class="grid grid-2">
-    <!-- First-login approvals -->
-    <div class="card">
-      <div class="card-h" data-i18n="pending_first_login"></div>
-      <div class="card-b" id="firstLogins"></div>
+  <!-- Admin / branch context -->
+  <div class="card pad" style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-size:24px">🗂️</div>
+    <div style="flex:1;min-width:180px">
+      <div class="muted" style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px" data-i18n="acting_as"></div>
+      <strong id="ctxAdmin" style="font-size:17px"></strong>
+      <span class="badge badge-navy" id="ctxBranch" style="margin-inline-start:8px"></span>
     </div>
+    <div class="field" style="margin:0;min-width:200px">
+      <label data-i18n="switch_admin"></label>
+      <select id="adminSwitch"></select>
+    </div>
+  </div>
 
-    <!-- Override deadline + dismissal time frames + config -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="overrides" data-i18n="tab_override_requests"></div>
+    <div class="tab" data-tab="invite" data-i18n="tab_invite_parent"></div>
+    <div class="tab" data-tab="students" data-i18n="tab_students_branch"></div>
+    <div class="tab" data-tab="frames" data-i18n="tab_dismissal_frames"></div>
+    <div class="tab" data-tab="firstlogin" data-i18n="tab_first_login"></div>
+  </div>
+
+  <!-- Override requests (default landing) -->
+  <section data-pane="overrides">
+    <div class="card">
+      <div class="card-h">
+        <span data-i18n="override_requests"></span>
+        <span class="spacer" style="flex:1"></span>
+        <span class="badge badge-amber" id="ovCount"></span>
+      </div>
+      <div class="card-b">
+        <p class="muted" style="font-size:13px;margin-top:0" data-i18n="deadline_help"></p>
+        <div id="ovCards"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Invite parent (assign to branch) -->
+  <section data-pane="invite" class="hidden">
+    <div class="card pad">
+      <h3 style="margin-top:0" data-i18n="invite_partner"></h3>
+      <div class="grid grid-3">
+        <div class="field" style="margin:0"><label data-i18n="parent_phone"></label><input class="input" id="aiParentPhone" placeholder="07xxxxxxxx"></div>
+        <div class="field" style="margin:0"><label data-i18n="parent_email"></label><input class="input" id="aiParentEmail" type="email"></div>
+        <div class="field" style="margin:0"><label data-i18n="parent_branch"></label><select id="aiParentBranch"></select></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin:12px 0 4px">
+        <h4 style="margin:0;flex:1" data-i18n="children"></h4>
+        <button class="btn btn-ghost" id="aiAddKid" type="button">＋ <span data-i18n="add_child"></span></button>
+      </div>
+      <div id="aiKidRows"></div>
+      <button class="btn btn-primary" id="aiSend" style="margin-top:6px" data-i18n="send_invite"></button>
+    </div>
+  </section>
+
+  <!-- Students: move between branches -->
+  <section data-pane="students" class="hidden">
+    <div class="card">
+      <div class="card-h">
+        <span data-i18n="students_title"></span>
+        <span class="spacer" style="flex:1"></span>
+        <input class="input" id="aiStuSearch" style="max-width:200px;padding:8px 10px" data-i18n-ph="search">
+      </div>
+      <div class="card-b">
+        <p class="muted" style="font-size:13px;margin-top:0" data-i18n="students_help"></p>
+        <div style="overflow:auto">
+          <table class="table table-responsive"><thead><tr>
+            <th data-i18n="student"></th><th data-i18n="grade"></th><th data-i18n="parent"></th><th data-i18n="move_branch"></th>
+          </tr></thead><tbody id="aiStuBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dismissal time frames + override deadline + method config -->
+  <section data-pane="frames" class="hidden">
     <div class="card">
       <div class="card-h" data-i18n="dismissal_frames"></div>
       <div class="card-b">
@@ -42,21 +110,15 @@
         <div id="methodConfig"></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Override requests -->
-  <div class="card" style="margin-top:16px">
-    <div class="card-h">
-      <span data-i18n="override_requests"></span>
-      <span class="spacer" style="flex:1"></span>
-      <span class="badge badge-amber" id="ovCount"></span>
+  <!-- First-login approvals -->
+  <section data-pane="firstlogin" class="hidden">
+    <div class="card">
+      <div class="card-h" data-i18n="pending_first_login"></div>
+      <div class="card-b" id="firstLogins"></div>
     </div>
-    <div style="overflow:auto">
-      <table class="table table-responsive"><thead><tr>
-        <th>ID</th><th data-i18n="student"></th><th data-i18n="method"></th><th data-i18n="time"></th><th data-i18n="status"></th><th data-i18n="actions"></th>
-      </tr></thead><tbody id="ovBody"></tbody></table>
-    </div>
-  </div>
+  </section>
 </main>
 
 <div data-chrome="foot"></div>
@@ -64,6 +126,31 @@
 <script src="assets/app.js"></script>
 <script>
 (function(){
+  /* ---- tabs ---- */
+  const tabs=document.getElementById("tabs");
+  if(tabs){
+    tabs.addEventListener("click",e=>{
+      const t=e.target.closest(".tab");if(!t)return;
+      tabs.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      document.querySelectorAll("[data-pane]").forEach(p=>p.classList.toggle("hidden",p.dataset.pane!==t.dataset.tab));
+    });
+  }
+
+  /* ---- admin / branch context ---- */
+  let adminId=(SD.admins()[0]||{}).id||null;
+  function curAdmin(){return SD.admins().find(a=>a.id===adminId)||SD.admins()[0]||null;}
+  function curBranch(){const a=curAdmin();return a?a.branchId:(SD.branches()[0]||{}).id;}
+  function branchOptions(sel){return SD.branches().map(b=>"<option value='"+b.id+"' "+(b.id===sel?"selected":"")+">"+SD.branchName(b)+"</option>").join("");}
+  function renderContext(){
+    const a=curAdmin();if(!a)return;
+    const ca=document.getElementById("ctxAdmin");if(ca)ca.textContent=SD.adminName(a);
+    const cb=document.getElementById("ctxBranch");if(cb)cb.textContent=SD.t("your_branch")+": "+SD.branchName(a.branchId);
+    const sw=document.getElementById("adminSwitch");
+    if(sw){sw.innerHTML=SD.admins().map(x=>"<option value='"+x.id+"' "+(x.id===adminId?"selected":"")+">"+SD.adminName(x)+" · "+SD.branchName(x.branchId)+"</option>").join("");
+      sw.onchange=()=>{adminId=sw.value;renderContext();};}
+  }
+
   function renderFirst(){
     const c=document.getElementById("firstLogins");c.innerHTML="";
     const fl=SD.state().firstLogins;
@@ -121,42 +208,117 @@
   }
 
   function renderOverrides(){
-    const b=document.getElementById("ovBody");b.innerHTML="";
-    const ovs=SD.state().overrides;
-    document.getElementById("ovCount").textContent=ovs.filter(o=>o.status==="pending").length+" "+SD.t("st_pending");
+    const wrap=document.getElementById("ovCards");if(!wrap)return;wrap.innerHTML="";
+    const ovs=SD.state().overrides.slice().sort((a,b)=>(a.status==="pending"?-1:1)-(b.status==="pending"?-1:1));
+    const pending=ovs.filter(o=>o.status==="pending").length;
+    document.getElementById("ovCount").textContent=pending+" "+SD.t("st_pending");
+    if(!ovs.length){wrap.innerHTML="<p class='muted'>"+SD.t("no_override_requests")+"</p>";return;}
     ovs.forEach(o=>{
-      const tr=document.createElement("tr");
-      const action=o.status==="pending"
+      const stu=SD.state().students.find(s=>s.name_en===o.student);
+      const br=stu?SD.studentBranch(stu):(o.branch?SD.branchById(o.branch):null);
+      const card=document.createElement("div");
+      card.className="card pad";card.style.cssText="margin-bottom:12px;background:var(--navy-50)";
+      const schoolLine=br?("<div class='muted' style='font-size:13px;margin-top:6px'>🏫 "+SD.t("school_name")+" — <strong>📍 "+SD.branchName(br)+"</strong> · "+br.phone+"</div>"):"";
+      const actions=o.status==="pending"
         ? "<button class='btn btn-success' data-act='ap'>"+SD.t("approve")+"</button> <button class='btn btn-ghost' data-act='dn'>"+SD.t("deny")+"</button>"
-        : "<span class='muted'>—</span>";
-      tr.innerHTML="<td data-label='ID'>"+o.id+"</td><td data-label='"+SD.t("student")+"'>"+SD.localizeStudentName(o.student)+"</td><td data-label='"+SD.t("method")+"'>"+SD.t(o.from)+" → "+SD.t(o.to)+"</td><td data-label='"+SD.t("time")+"'>"+o.time+"</td><td data-label='"+SD.t("status")+"'>"+SD.statusBadge(o.status)+"</td><td data-label='"+SD.t("actions")+"'>"+action+"</td>";
-      const ap=tr.querySelector("[data-act='ap']"),dn=tr.querySelector("[data-act='dn']");
+        : "";
+      card.innerHTML=
+        "<div style='display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap'>"+
+          "<div style='flex:1;min-width:180px'>"+
+            "<div style='display:flex;align-items:center;gap:8px;flex-wrap:wrap'><strong style='font-size:16px'>"+SD.localizeStudentName(o.student)+"</strong> "+SD.statusBadge(o.status)+"</div>"+
+            "<div class='muted' style='font-size:13px;margin-top:2px'>"+o.id+" · "+SD.t(o.from)+" → "+SD.t(o.to)+" · "+SD.t("requested_at")+" "+o.time+"</div>"+
+            schoolLine+
+          "</div>"+
+          "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+actions+"</div>"+
+        "</div>";
+      const ap=card.querySelector("[data-act='ap']"),dn=card.querySelector("[data-act='dn']");
       if(ap)ap.onclick=()=>decideOv(o,true);
       if(dn)dn.onclick=()=>decideOv(o,false);
-      b.appendChild(tr);
+      wrap.appendChild(card);
     });
   }
   function decideOv(o,approved){
     o.status=approved?"approved":"denied";
     o.date=SD.dateStr();
     const st=SD.state();
-    if(approved){
-      const stu=st.students.find(s=>SD.studentName(s)===o.student||s.name_en===o.student);
-      if(stu){stu.method="car";stu.status="inqueue";}
-    }
-    st.audit.unshift({time:nowTime(),actor:"Admin · Reem",
-      event_en:(approved?"Approved":"Denied")+" override "+o.id,
+    const stu=st.students.find(s=>SD.studentName(s)===o.student||s.name_en===o.student);
+    if(approved&&stu){stu.method="car";stu.status="inqueue";}
+    const who="Admin · "+(curAdmin()?curAdmin().name_en:"Reem");
+    st.audit.unshift({time:nowTime(),actor:who,
+      event_en:(approved?"Approved":"Denied")+" override "+o.id+(stu?(" ("+SD.branchName(stu.branchId)+")"):""),
       event_ar:(approved?"اعتماد":"رفض")+" استثناء "+o.id,type:approved?"approved":"denied"});
     SD.save();renderOverrides();
     if(approved){
       SD.notify("Override "+o.id+" approved for "+o.student+" — a day-scoped pickup QR is now available"+(st.securityRequired?" and routed to gate security":""),
         "تم اعتماد الاستثناء "+o.id+" لـ "+SD.localizeStudentName(o.student)+" — أصبح رمز الاستلام اليومي متاحًا"+(st.securityRequired?" وأُرسل لأمن البوابة":""),"success");
     }else{
-      SD.notify("Override "+o.id+" denied — "+o.student+"'s parent notified","تم رفض الاستثناء "+o.id+" — تم إخطار ولي أمر "+SD.localizeStudentName(o.student),"warn");
+      SD.notify("Override "+o.id+" denied — "+o.student+"'s guardian/parent notified","تم رفض الاستثناء "+o.id+" — تم إخطار ولي الأمر1 "+SD.localizeStudentName(o.student),"warn");
     }
   }
 
   function nowTime(){return new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});}
+
+  /* ---- Admin: invite parent + add kids (assign branch) ---- */
+  let aiKidSeq=0;
+  function aiBandOptions(sel){return SD.gradeBands().map(b=>"<option value='"+b.id+"' "+(b.id===sel?"selected":"")+">"+SD.bandName(b)+"</option>").join("");}
+  function aiAddKidRow(){
+    const rows=document.getElementById("aiKidRows");if(!rows)return;
+    const id="ak"+(aiKidSeq++);
+    const div=document.createElement("div");div.className="card pad";div.style.cssText="margin-bottom:10px;background:var(--navy-50)";div.dataset.kid=id;
+    div.innerHTML="<div class='grid grid-3'>"+
+      "<div class='field' style='margin:0'><label>"+SD.t("student_name")+"</label><input class='input ak-name'></div>"+
+      "<div class='field' style='margin:0'><label>"+SD.t("dismissal_level")+"</label><select class='ak-band'>"+aiBandOptions("")+"</select></div>"+
+      "<div class='field' style='margin:0'><label>"+SD.t("branch")+"</label><select class='ak-branch'>"+branchOptions(curBranch())+"</select></div>"+
+      "</div><div style='text-align:end;margin-top:6px'><button type='button' class='btn btn-ghost ak-remove' style='padding:4px 10px;font-size:13px;color:var(--alert)'>✕ "+SD.t("remove")+"</button></div>";
+    div.querySelector(".ak-remove").onclick=()=>div.remove();
+    rows.appendChild(div);
+  }
+  function renderAiInvite(){
+    const sel=document.getElementById("aiParentBranch");if(sel)sel.innerHTML=branchOptions(curBranch());
+  }
+  const aiAddKidBtn=document.getElementById("aiAddKid");if(aiAddKidBtn)aiAddKidBtn.onclick=()=>aiAddKidRow();
+  const aiSendBtn=document.getElementById("aiSend");
+  if(aiSendBtn)aiSendBtn.onclick=()=>{
+    const phone=document.getElementById("aiParentPhone").value.trim();
+    const pBranch=document.getElementById("aiParentBranch").value;
+    const rows=[...document.querySelectorAll("#aiKidRows [data-kid]")];
+    const sampleGrade={kg:"KG2",lower:"2-A",upper:"5-A"};
+    const st=SD.state();let n=0;
+    rows.forEach(r=>{
+      const name=r.querySelector(".ak-name").value.trim();if(!name)return;
+      const band=r.querySelector(".ak-band").value,br=r.querySelector(".ak-branch").value||pBranch;
+      const sid="S-"+Math.floor(1200+Math.random()*800);
+      st.students.push({id:sid,name_en:name,name_ar:name,grade:sampleGrade[band]||"5-A",method:"bus2",parent:"Invited Parent",branchId:br,status:"waiting"});
+      st.audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Invited child "+name+" → "+SD.branchName(br),event_ar:"دعوة الطفل "+name+" → "+SD.branchName(br),type:"info"});n++;
+    });
+    if(!phone&&!n){SD.toast(SD.curLang()==="ar"?"أدخل هاتف ولي الأمر1 أو طفلًا واحدًا":"Enter a guardian/parent phone or at least one child","warn");return;}
+    st.audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Invited guardian/parent "+(phone||"")+" → "+SD.branchName(pBranch),event_ar:"دعوة ولي الأمر1 "+(phone||"")+" → "+SD.branchName(pBranch),type:"info"});
+    SD.save();renderAiStudents();
+    document.getElementById("aiParentPhone").value="";document.getElementById("aiParentEmail").value="";
+    document.getElementById("aiKidRows").innerHTML="";
+    SD.toast((SD.curLang()==="ar"?"تم إرسال الدعوة · الفرع: ":"Invitation sent · branch: ")+SD.branchName(pBranch)+(n?(" · "+n+" "+SD.t("children")):""),"success");
+  };
+
+  /* ---- Admin: move students between branches ---- */
+  function renderAiStudents(){
+    const body=document.getElementById("aiStuBody");if(!body)return;body.innerHTML="";
+    const q=((document.getElementById("aiStuSearch")||{}).value||"").toLowerCase();
+    const list=SD.state().students.filter(s=>!q||(s.name_en+" "+s.name_ar+" "+s.grade+" "+s.parent).toLowerCase().indexOf(q)>-1);
+    if(!list.length){body.innerHTML="<tr><td colspan='4' class='muted'>"+SD.t("no_students")+"</td></tr>";return;}
+    list.forEach(s=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.id+"</div></td>"+
+        "<td data-label='"+SD.t("grade")+"'>"+s.grade+"</td>"+
+        "<td data-label='"+SD.t("parent")+"'>"+SD.personName(s.parent)+"</td>"+
+        "<td data-label='"+SD.t("move_branch")+"'><select data-stu='"+s.id+"'>"+branchOptions(s.branchId)+"</select></td>";
+      const dd=tr.querySelector("select");
+      dd.onchange=()=>{SD.moveStudent(s.id,dd.value);
+        SD.state().audit.unshift({time:nowTime(),actor:"Admin · "+(curAdmin()?curAdmin().name_en:""),event_en:"Moved "+s.name_en+" to "+SD.branchName(dd.value),event_ar:"نقل "+s.name_ar+" إلى "+SD.branchName(dd.value),type:"info"});SD.save();
+        SD.toast(SD.studentName(s)+" → "+SD.branchName(dd.value),"success");};
+      body.appendChild(tr);
+    });
+  }
+  const aiStuSearch=document.getElementById("aiStuSearch");if(aiStuSearch)aiStuSearch.oninput=renderAiStudents;
 
   document.getElementById("deadline").value=SD.state().overrideDeadlineMin;
   document.getElementById("deadline").onchange=function(){
@@ -164,7 +326,8 @@
     SD.toast("Override deadline set to "+this.value+" min before dismissal","");
   };
 
-  function renderAll(){renderFirst();renderMethods();renderOverrides();renderBands();}
+  function renderAll(){renderContext();renderFirst();renderMethods();renderOverrides();renderBands();renderAiInvite();renderAiStudents();}
+  aiAddKidRow();
   document.addEventListener("langchange",renderAll);
   document.addEventListener("sdsync",renderAll);
   document.addEventListener("DOMContentLoaded",()=>setTimeout(renderAll,0));

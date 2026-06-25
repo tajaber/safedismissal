@@ -7,17 +7,75 @@
     app_name:{en:"SafeDismiss",ar:"الانصراف الآمن"},
     tagline:{en:"Safe, fast, and verified school dismissal",ar:"انصراف مدرسي آمن وسريع ومُتحقَّق منه"},
     nav_home:{en:"Home",ar:"الرئيسية"},
+    nav_moderator:{en:"Moderator",ar:"المشرف"},
+    nav_admin:{en:"Admin",ar:"المسؤول"},
+    nav_parent:{en:"Guardian/Parent",ar:"ولي الأمر1"},
+    nav_security:{en:"Security",ar:"الأمن"},
+    nav_dashboard:{en:"Dashboard",ar:"لوحة التحكم"},
     choose_role:{en:"Choose your role to explore the prototype",ar:"اختر دورك لاستكشاف النموذج"},
     role_moderator:{en:"School Moderator",ar:"مشرف المدرسة"},
-    role_moderator_d:{en:"Register school, invite parents, manage QR, audit logs & security policy",ar:"تسجيل المدرسة ودعوة أولياء الأمور وإدارة رموز QR والسجلات وسياسة الأمن"},
+    role_moderator_d:{en:"Register school, invite guardians/parents, manage QR, audit logs & security policy",ar:"تسجيل المدرسة ودعوة أولياء الأمور وإدارة رموز QR والسجلات وسياسة الأمن"},
     role_admin:{en:"Dismissal Admin",ar:"مسؤول الانصراف"},
     role_admin_d:{en:"Approve first logins, set dismissal methods, deadlines & override decisions",ar:"اعتماد أول دخول وضبط طرق الانصراف والمواعيد وقرارات الاستثناء"},
-    role_parent:{en:"Parent / Co-Parent",ar:"ولي الأمر / الشريك"},
+    role_parent:{en:"Guardian/Parent / Guardian/Parent2",ar:"ولي الأمر1 / ولي الأمر2"},
     role_parent_d:{en:"Accept terms, manage kids, announce arrival, request override, show QR",ar:"قبول الشروط وإدارة الأبناء وإعلان الوصول وطلب الاستثناء وعرض QR"},
     role_security:{en:"Security / Gate",ar:"الأمن / البوابة"},
     role_security_d:{en:"Scan QR, verify identity, confirm release with one tap",ar:"مسح QR والتحقق من الهوية وتأكيد التسليم بلمسة"},
     role_dashboard:{en:"Web Dashboard",ar:"لوحة التحكم"},
     role_dashboard_d:{en:"System-wide summary of users, approvals & live activity",ar:"ملخص شامل للمستخدمين والموافقات والنشاط المباشر"},
+
+    /* landing page */
+    nav_features:{en:"Features",ar:"المزايا"},
+    nav_how:{en:"How it works",ar:"كيف يعمل"},
+    nav_roles:{en:"Roles",ar:"الأدوار"},
+    nav_launch:{en:"Launch demo",ar:"تشغيل العرض"},
+    land_badge:{en:"Built for safer schools",ar:"مصمّم لمدارس أكثر أمانًا"},
+    land_title:{en:"School dismissal made",ar:"انصراف مدرسي"},
+    land_title_hl:{en:"safe, fast & verified",ar:"آمن وسريع ومُتحقَّق"},
+    land_sub:{en:"SafeDismiss links schools, guardians/parents and security in one verified flow — from arrival to release, every hand-over is logged, confirmed and child-safe.",ar:"يربط الانصراف الآمن بين المدرسة وأولياء الأمور والأمن في تدفّق واحد مُتحقَّق — من الوصول حتى التسليم، كل عملية تسجَّل وتُؤكَّد بأمان كامل للطفل."},
+    land_cta_primary:{en:"Explore the demo",ar:"استكشف العرض"},
+    land_cta_secondary:{en:"See how it works",ar:"شاهد كيف يعمل"},
+    pv_title:{en:"Live dismissal",ar:"الانصراف المباشر"},
+    pv_now:{en:"Now",ar:"الآن"},
+    pv_released:{en:"Released",ar:"تم التسليم"},
+    pv_inqueue:{en:"In queue",ar:"في الطابور"},
+    pv_gate:{en:"Gate 2 · verified",ar:"البوابة 2 · مُتحقَّق"},
+    pv_arriving:{en:"Guardian/Parent arriving",ar:"ولي الأمر1 قادم"},
+
+    stat_schools_n:{en:"120+",ar:"+١٢٠"},
+    stat_schools_l:{en:"Schools onboarded",ar:"مدرسة مشتركة"},
+    stat_time_n:{en:"3 min",ar:"٣ دقائق"},
+    stat_time_l:{en:"Avg. release time",ar:"متوسط زمن التسليم"},
+    stat_safe_n:{en:"100%",ar:"١٠٠٪"},
+    stat_safe_l:{en:"Verified hand-overs",ar:"عمليات تسليم مُتحقَّقة"},
+
+    feat_eyebrow:{en:"Why SafeDismiss",ar:"لماذا الانصراف الآمن"},
+    feat_head:{en:"Everything a safe dismissal needs",ar:"كل ما يحتاجه انصراف آمن"},
+    feat_sub:{en:"One connected platform for schools, families and security teams.",ar:"منصّة واحدة متّصلة للمدارس والعائلات وفرق الأمن."},
+    feat1_t:{en:"Verified QR release",ar:"تسليم بـ QR مُتحقَّق"},
+    feat1_d:{en:"Single-day, rotating QR codes scanned at the gate — no wrong hand-overs, ever.",ar:"رموز QR متجدّدة ليوم واحد تُمسح عند البوابة — لا تسليم خاطئ أبدًا."},
+    feat2_t:{en:"Real-time queue",ar:"طابور لحظي"},
+    feat2_d:{en:"Guardians/parents announce arrival; staff see a live, ordered pickup queue per grade band.",ar:"يعلن أولياء الأمور وصولهم؛ ويرى الطاقم طابور استلام مباشر مرتّب لكل فئة صفية."},
+    feat3_t:{en:"Guardian/Parent & Guardian/Parent2 app",ar:"تطبيق ولي الأمر1 وولي الأمر2"},
+    feat3_d:{en:"Manage kids, request overrides and show pickup passes — bilingual, mobile-first.",ar:"إدارة الأبناء وطلب الاستثناءات وعرض تصاريح الاستلام — بلغتين وبتصميم للجوال."},
+    feat4_t:{en:"Audit & child safety",ar:"تدقيق وسلامة الطفل"},
+    feat4_d:{en:"Every action is time-stamped and logged for a complete, exportable audit trail.",ar:"كل إجراء مختوم بالوقت ومسجَّل ضمن سجل تدقيق كامل قابل للتصدير."},
+
+    how_eyebrow:{en:"How it works",ar:"كيف يعمل"},
+    how_head:{en:"From arrival to release in three steps",ar:"من الوصول حتى التسليم في ثلاث خطوات"},
+    how1_t:{en:"Announce arrival",ar:"إعلان الوصول"},
+    how1_d:{en:"Guardian/Parent taps “I'm here” in the app on the way to school.",ar:"يضغط ولي الأمر1 «أنا هنا» في التطبيق وهو في الطريق إلى المدرسة."},
+    how2_t:{en:"Verify at the gate",ar:"التحقق عند البوابة"},
+    how2_d:{en:"Security scans the day's QR and confirms identity in one tap.",ar:"يمسح الأمن رمز QR الخاص باليوم ويؤكّد الهوية بلمسة واحدة."},
+    how3_t:{en:"Confirm release",ar:"تأكيد التسليم"},
+    how3_d:{en:"The student is released and everyone is notified instantly.",ar:"يتم تسليم الطالب ويُخطَر الجميع فورًا."},
+
+    roles_eyebrow:{en:"Try the prototype",ar:"جرّب النموذج"},
+    cta_title:{en:"Ready for a safer dismissal?",ar:"جاهز لانصراف أكثر أمانًا؟"},
+    cta_sub:{en:"Pick any role below and explore the full SafeDismiss experience.",ar:"اختر أي دور بالأسفل واستكشف تجربة الانصراف الآمن كاملة."},
+    cta_button:{en:"Start exploring",ar:"ابدأ الاستكشاف"},
+    foot_rights:{en:"Prototype for demonstration purposes.",ar:"نموذج لأغراض العرض التوضيحي."},
+
     open:{en:"Open",ar:"فتح"},
     back:{en:"Back",ar:"رجوع"},
     next:{en:"Next",ar:"التالي"},
@@ -33,7 +91,7 @@
     actions:{en:"Actions",ar:"إجراءات"},
     student:{en:"Student",ar:"الطالب"},
     grade:{en:"Grade",ar:"الصف"},
-    parent:{en:"Parent",ar:"ولي الأمر"},
+    parent:{en:"Guardian/Parent",ar:"ولي الأمر1"},
     method:{en:"Dismissal Method",ar:"طريقة الانصراف"},
     time:{en:"Time",ar:"الوقت"},
 
@@ -53,7 +111,7 @@
     mod_dash:{en:"Moderator Console",ar:"لوحة المشرف"},
     tab_overview:{en:"Overview",ar:"نظرة عامة"},
     tab_register:{en:"School Setup",ar:"إعداد المدرسة"},
-    tab_invite:{en:"Invite Parents",ar:"دعوة أولياء الأمور"},
+    tab_invite:{en:"Invite Guardians/Parents",ar:"دعوة أولياء الأمور"},
     tab_qr:{en:"Kid QR Codes",ar:"رموز QR للأبناء"},
     tab_audit:{en:"Audit Log",ar:"سجل التدقيق"},
     tab_terms:{en:"Terms & Policy",ar:"الشروط والسياسة"},
@@ -61,15 +119,15 @@
     security_toggle_d:{en:"When ON, a security officer must scan & confirm before any release.",ar:"عند التفعيل، يجب أن يقوم ضابط الأمن بالمسح والتأكيد قبل أي تسليم."},
     required:{en:"Required",ar:"مطلوب"},
     not_required:{en:"Not Required",ar:"غير مطلوب"},
-    invite_partner:{en:"Invite Parent & Co-Parent",ar:"دعوة ولي الأمر والشريك"},
-    parent_phone:{en:"Parent phone",ar:"هاتف ولي الأمر"},
-    parent_email:{en:"Parent email (optional)",ar:"بريد ولي الأمر (اختياري)"},
-    coparent_phone:{en:"Co-parent phone",ar:"هاتف الشريك"},
-    coparent_email:{en:"Co-parent email (optional)",ar:"بريد الشريك (اختياري)"},
+    invite_partner:{en:"Invite Guardian/Parent & Guardian/Parent2",ar:"دعوة ولي الأمر1 وولي الأمر2"},
+    parent_phone:{en:"Guardian/Parent phone",ar:"هاتف ولي الأمر1"},
+    parent_email:{en:"Guardian/Parent email (optional)",ar:"بريد ولي الأمر1 (اختياري)"},
+    coparent_phone:{en:"Guardian/Parent2 phone",ar:"هاتف ولي الأمر2"},
+    coparent_email:{en:"Guardian/Parent2 email (optional)",ar:"بريد ولي الأمر2 (اختياري)"},
     send_invite:{en:"Send Invitations",ar:"إرسال الدعوات"},
     generate_qr:{en:"Generate QR",ar:"إنشاء QR"},
     download_qr:{en:"Download",ar:"تنزيل"},
-    terms_intro:{en:"Parents must accept these terms before first use.",ar:"يجب على أولياء الأمور قبول هذه الشروط قبل أول استخدام."},
+    terms_intro:{en:"Guardians/parents must accept these terms before first use.",ar:"يجب على أولياء الأمور قبول هذه الشروط قبل أول استخدام."},
 
     /* admin */
     admin_dash:{en:"Dismissal Admin",ar:"مسؤول الانصراف"},
@@ -84,7 +142,7 @@
     car:{en:"Car pick-up",ar:"بالسيارة"},
 
     /* parent */
-    parent_dash:{en:"Parent Dashboard",ar:"لوحة ولي الأمر"},
+    parent_dash:{en:"Guardian/Parent Dashboard",ar:"لوحة ولي الأمر1"},
     my_kids:{en:"My Children",ar:"أبنائي"},
     announce_arrival:{en:"ANNOUNCE ARRIVAL",ar:"إعلان الوصول"},
     announced_queue:{en:"Announced — In Queue",ar:"تم الإعلان — في الطابور"},
@@ -95,23 +153,23 @@
     accept_invite:{en:"Accept Invitation",ar:"قبول الدعوة"},
     override_blocked:{en:"Override window closed. Please phone the school: 0791234567",ar:"انتهى وقت طلب الاستثناء. يرجى الاتصال بالمدرسة: 0791234567"},
     override_sent:{en:"Override request sent to the school for approval.",ar:"تم إرسال طلب الاستثناء إلى المدرسة للموافقة."},
-    coparent:{en:"Co-Parent",ar:"الشريك"},
+    coparent:{en:"Guardian/Parent2",ar:"ولي الأمر2"},
 
     /* security */
     sec_dash:{en:"Gate Release Station",ar:"محطة التسليم بالبوابة"},
-    scan_qr:{en:"SCAN PARENT QR",ar:"مسح رمز ولي الأمر"},
+    scan_qr:{en:"SCAN GUARDIAN/PARENT QR",ar:"مسح رمز ولي الأمر1"},
     scanning:{en:"Scanning…",ar:"جارٍ المسح…"},
     confirm_release:{en:"CONFIRM RELEASE",ar:"تأكيد التسليم"},
     released_saved:{en:"Released • Timestamped & Saved",ar:"تم التسليم • مُوثّق ومحفوظ"},
     active_queue:{en:"Active Pickup Queue",ar:"طابور الاستلام النشط"},
-    search_phone:{en:"Battery dead? Search parent phone",ar:"بطارية فارغة؟ ابحث بهاتف ولي الأمر"},
+    search_phone:{en:"Battery dead? Search guardian/parent phone",ar:"بطارية فارغة؟ ابحث بهاتف ولي الأمر1"},
     verify_identity:{en:"Verify Identity",ar:"التحقق من الهوية"},
     matched:{en:"Identity matched. Release enabled.",ar:"تطابقت الهوية. تم تفعيل التسليم."},
 
     /* dashboard */
     dash_title:{en:"System Dashboard",ar:"لوحة النظام"},
     total_schools:{en:"Schools",ar:"المدارس"},
-    total_parents:{en:"Parents",ar:"أولياء الأمور"},
+    total_parents:{en:"Guardians/Parents",ar:"أولياء الأمور"},
     total_students:{en:"Students",ar:"الطلاب"},
     pending_approvals:{en:"Pending Approvals",ar:"موافقات معلّقة"},
     releases_today:{en:"Releases Today",ar:"تسليمات اليوم"},
@@ -163,7 +221,77 @@
     label_city:{en:"City",ar:"المدينة"},
     label_address:{en:"Address",ar:"العنوان"},
     label_school:{en:"School name",ar:"اسم المدرسة"},
-    onboard_terms_note:{en:"By continuing you accept the school's Terms & Conditions, QR usage policy, and dismissal rules.",ar:"بالمتابعة فإنك توافق على شروط وأحكام المدرسة وسياسة استخدام رمز QR وقواعد الانصراف."}
+    onboard_terms_note:{en:"By continuing you accept the school's Terms & Conditions, QR usage policy, and dismissal rules.",ar:"بالمتابعة فإنك توافق على شروط وأحكام المدرسة وسياسة استخدام رمز QR وقواعد الانصراف."},
+
+    /* branches & admins */
+    tab_branches:{en:"Branches",ar:"الفروع"},
+    tab_admins:{en:"Admins",ar:"المسؤولون"},
+    tab_students:{en:"Students",ar:"الطلاب"},
+    branches_title:{en:"Branches & Locations",ar:"الفروع والمواقع"},
+    branches_help:{en:"A school can operate several branches/locations. Each branch has its own name and phone, and is selected when adding parents and students.",ar:"يمكن أن تدير المدرسة عدة فروع/مواقع. لكل فرع اسمه وهاتفه الخاص، ويُحدَّد عند إضافة أولياء الأمور والطلاب."},
+    add_branch:{en:"Add branch",ar:"إضافة فرع"},
+    branch_name:{en:"Branch name",ar:"اسم الفرع"},
+    branch_phone:{en:"Branch phone",ar:"هاتف الفرع"},
+    branch:{en:"Branch",ar:"الفرع"},
+    select_branch:{en:"Select branch",ar:"اختر الفرع"},
+    branch_saved:{en:"Branch saved",ar:"تم حفظ الفرع"},
+    branch_required:{en:"Enter a branch name and phone",ar:"أدخل اسم الفرع وهاتفه"},
+    admins_title:{en:"Admin Accounts",ar:"حسابات المسؤولين"},
+    admins_help:{en:"Create dismissal-admin accounts and link each one to a branch. You can move an admin to another branch at any time.",ar:"أنشئ حسابات مسؤولي الانصراف واربط كل مسؤول بفرع. يمكنك نقل المسؤول إلى فرع آخر في أي وقت."},
+    create_admin:{en:"Create admin",ar:"إنشاء مسؤول"},
+    admin_name:{en:"Admin name",ar:"اسم المسؤول"},
+    admin_phone:{en:"Admin phone",ar:"هاتف المسؤول"},
+    admin_created:{en:"Admin account created",ar:"تم إنشاء حساب المسؤول"},
+    admin_moved:{en:"Admin moved to",ar:"تم نقل المسؤول إلى"},
+    admin_required:{en:"Enter an admin name and phone",ar:"أدخل اسم المسؤول وهاتفه"},
+    assigned_branch:{en:"Assigned branch",ar:"الفرع المُسنَد"},
+    move_branch:{en:"Move to branch",ar:"النقل إلى فرع"},
+    student_moved:{en:"Student moved to",ar:"تم نقل الطالب إلى"},
+    students_title:{en:"Students & Branch Assignment",ar:"الطلاب وإسناد الفروع"},
+    students_help:{en:"Each student belongs to one branch at a time. Move a student between branches whenever needed.",ar:"ينتمي كل طالب إلى فرع واحد في كل مرة. انقل الطالب بين الفروع متى لزم الأمر."},
+    parent_branch:{en:"Guardian/Parent branch",ar:"فرع ولي الأمر1"},
+    no_students:{en:"No students yet",ar:"لا يوجد طلاب بعد"},
+    your_branch:{en:"Your branch",ar:"فرعك"},
+    acting_as:{en:"Acting as",ar:"تعمل بصفة"},
+    switch_admin:{en:"Switch admin",ar:"تبديل المسؤول"},
+    branch_location:{en:"Branch / Location",ar:"الفرع / الموقع"},
+    notified_admins:{en:"Notified branch admins",ar:"تم إخطار مسؤولي الفرع"},
+
+    /* admin tabs */
+    tab_override_requests:{en:"Override Requests",ar:"طلبات الاستثناء"},
+    tab_invite_parent:{en:"Invite Guardian/Parent",ar:"دعوة ولي الأمر"},
+    tab_students_branch:{en:"Students & Branches",ar:"الطلاب والفروع"},
+    tab_dismissal_frames:{en:"Dismissal Times",ar:"أوقات الانصراف"},
+    tab_first_login:{en:"First-Login Approvals",ar:"موافقات أول دخول"},
+    no_override_requests:{en:"No override requests right now.",ar:"لا توجد طلبات استثناء حاليًا."},
+    school_details:{en:"School details",ar:"تفاصيل المدرسة"},
+    requested_at:{en:"Requested",ar:"وقت الطلب"},
+
+    /* classes & teacher */
+    nav_teacher:{en:"Teacher",ar:"المعلّم"},
+    role_teacher:{en:"Teacher / Classroom",ar:"المعلّم / الصف"},
+    role_teacher_d:{en:"See approved overrides & announced arrivals for your class in real time",ar:"اطّلع على الاستثناءات المعتمدة وإعلانات الوصول لصفك لحظيًا"},
+    tab_classes:{en:"Classes",ar:"الفصول"},
+    classes_title:{en:"Classes & Classroom Display",ar:"الفصول وعرض الصف"},
+    classes_help:{en:"Enable the classroom display per branch so teachers see approved overrides and announced arrivals. When enabled, add classes and link students to them.",ar:"فعِّل عرض الصف لكل فرع ليرى المعلّمون الاستثناءات المعتمدة وإعلانات الوصول. عند التفعيل، أضف الفصول واربط الطلاب بها."},
+    classroom_display:{en:"Classroom display",ar:"عرض الصف"},
+    feature_on:{en:"Enabled",ar:"مفعّل"},
+    feature_off:{en:"Disabled",ar:"معطّل"},
+    add_class:{en:"Add class",ar:"إضافة فصل"},
+    class_name:{en:"Class name",ar:"اسم الفصل"},
+    class_label:{en:"Class",ar:"الفصل"},
+    no_class:{en:"No class",ar:"بدون فصل"},
+    link_class:{en:"Link to class",ar:"الربط بفصل"},
+    classes_disabled_branch:{en:"Classroom display is disabled for this branch.",ar:"عرض الصف معطّل لهذا الفرع."},
+    no_classes:{en:"No classes yet. Add one above.",ar:"لا توجد فصول بعد. أضف فصلًا بالأعلى."},
+    class_added:{en:"Class added",ar:"تمت إضافة الفصل"},
+    teacher_dash:{en:"Classroom Board",ar:"لوحة الصف"},
+    teacher_sub:{en:"Live approved overrides & announced arrivals for your class",ar:"الاستثناءات المعتمدة وإعلانات الوصول لصفك مباشرةً"},
+    select_class:{en:"Select class",ar:"اختر الفصل"},
+    feed_announced:{en:"Announced — heading to gate",ar:"تم الإعلان — متوجه للبوابة"},
+    feed_override:{en:"Override approved — car pick-up",ar:"اعتُمد الاستثناء — استلام بالسيارة"},
+    feed_empty:{en:"Nothing to show yet. Approved overrides and announced arrivals will appear here.",ar:"لا شيء لعرضه بعد. ستظهر هنا الاستثناءات المعتمدة وإعلانات الوصول."},
+    no_class_branches:{en:"No branch has the classroom display enabled yet. Ask your moderator to enable it.",ar:"لا يوجد فرع مفعّل لعرض الصف بعد. اطلب من المشرف تفعيله."}
   };
 
   /* ---------------- mock data ---------------- */
@@ -171,19 +299,35 @@
     lang:"en",
     securityRequired:true,
     overrideDeadlineMin:30,
+    branches:[
+      {id:"main",name_en:"Main Campus",name_ar:"المقر الرئيسي",phone:"0791234567",classesEnabled:true},
+      {id:"north",name_en:"North Branch",name_ar:"الفرع الشمالي",phone:"0791112222",classesEnabled:true},
+      {id:"west",name_en:"West Branch",name_ar:"الفرع الغربي",phone:"0791113333",classesEnabled:false}
+    ],
+    classes:[
+      {id:"C-1",name_en:"KG1 — Sunflowers",name_ar:"روضة ١ — دوار الشمس",branchId:"main"},
+      {id:"C-2",name_en:"Grade 5 — Falcons",name_ar:"الصف الخامس — الصقور",branchId:"main"},
+      {id:"C-3",name_en:"KG2 — Tulips",name_ar:"روضة ٢ — الزنابق",branchId:"north"},
+      {id:"C-4",name_en:"Grade 4 — Eagles",name_ar:"الصف الرابع — النسور",branchId:"north"}
+    ],
+    admins:[
+      {id:"A-1",name_en:"Reem Odeh",name_ar:"ريم عودة",phone:"0790555001",branchId:"main"},
+      {id:"A-2",name_en:"Sami Haddad",name_ar:"سامي حداد",phone:"0790555002",branchId:"north"},
+      {id:"A-3",name_en:"Lara Nimer",name_ar:"لارا نمر",phone:"0790555003",branchId:"west"}
+    ],
     gradeBands:[
       {id:"kg",name_en:"KG1–KG2",name_ar:"روضة ١–٢",dismissal:"12:30"},
       {id:"lower",name_en:"Grades 1–3",name_ar:"الصفوف ١–٣",dismissal:"13:30"},
       {id:"upper",name_en:"Grades 4–6",name_ar:"الصفوف ٤–٦",dismissal:"14:30"}
     ],
     students:[
-      {id:"S-2001",name_en:"Bisan Jaber",name_ar:"بيسان جابر",grade:"KG1",method:"car",parent:"Tariq Jaber",phone:"0790112233",status:"waiting"},
-      {id:"S-2002",name_en:"Razan Jaber",name_ar:"رزان جابر",grade:"2-A",method:"bus2",parent:"Tariq Jaber",phone:"0790112233",status:"waiting"},
-      {id:"S-2003",name_en:"Majed Jaber",name_ar:"ماجد جابر",grade:"5-B",method:"car",parent:"Tariq Jaber",phone:"0790112233",status:"inqueue"},
-      {id:"S-2004",name_en:"Saad Jaber",name_ar:"سعد جابر",grade:"3-C",method:"bus1a",parent:"Tariq Jaber",phone:"0790112233",status:"waiting"},
-      {id:"S-2005",name_en:"Mesk Yousef",name_ar:"مسك يوسف",grade:"KG2",method:"car",parent:"Fadi Yousef",phone:"0790332211",status:"inqueue"},
-      {id:"S-2006",name_en:"Wesam Yousef",name_ar:"وسام يوسف",grade:"4-A",method:"bus2",parent:"Fadi Yousef",phone:"0790332211",status:"waiting"},
-      {id:"S-2007",name_en:"Ismael Yousef",name_ar:"إسماعيل يوسف",grade:"1-B",method:"car",parent:"Fadi Yousef",phone:"0790332211",status:"waiting"}
+      {id:"S-2001",name_en:"Bisan Jaber",name_ar:"بيسان جابر",grade:"KG1",method:"car",parent:"Tariq Jaber",phone:"0790112233",branchId:"main",classId:"C-1",status:"waiting"},
+      {id:"S-2002",name_en:"Razan Jaber",name_ar:"رزان جابر",grade:"2-A",method:"bus2",parent:"Tariq Jaber",phone:"0790112233",branchId:"north",classId:"",status:"waiting"},
+      {id:"S-2003",name_en:"Majed Jaber",name_ar:"ماجد جابر",grade:"5-B",method:"car",parent:"Tariq Jaber",phone:"0790112233",branchId:"main",classId:"C-2",status:"inqueue"},
+      {id:"S-2004",name_en:"Saad Jaber",name_ar:"سعد جابر",grade:"3-C",method:"bus1a",parent:"Tariq Jaber",phone:"0790112233",branchId:"west",classId:"",status:"waiting"},
+      {id:"S-2005",name_en:"Mesk Yousef",name_ar:"مسك يوسف",grade:"KG2",method:"car",parent:"Fadi Yousef",phone:"0790332211",branchId:"north",classId:"C-3",status:"inqueue"},
+      {id:"S-2006",name_en:"Wesam Yousef",name_ar:"وسام يوسف",grade:"4-A",method:"bus2",parent:"Fadi Yousef",phone:"0790332211",branchId:"north",classId:"C-4",status:"waiting"},
+      {id:"S-2007",name_en:"Ismael Yousef",name_ar:"إسماعيل يوسف",grade:"1-B",method:"car",parent:"Fadi Yousef",phone:"0790332211",branchId:"west",classId:"",status:"waiting"}
     ],
     overrides:[
       {id:"OV-301",student:"Razan Jaber",from:"bus2",to:"car",status:"pending",time:"01:48 PM"}
@@ -195,7 +339,7 @@
     audit:[
       {time:"01:31 PM",actor:"Security · Gate 2",event_en:"Released Majed Jaber (QR verified)",event_ar:"تم تسليم ماجد جابر (تم التحقق من QR)",type:"released"},
       {time:"01:28 PM",actor:"Admin · Reem",event_en:"Approved override OV-298 (bus→car)",event_ar:"اعتماد استثناء OV-298 (حافلة→سيارة)",type:"approved"},
-      {time:"01:15 PM",actor:"Parent · Tariq Jaber",event_en:"Announced arrival for Majed Jaber",event_ar:"إعلان وصول لماجد جابر",type:"info"},
+      {time:"01:15 PM",actor:"Guardian/Parent · Tariq Jaber",event_en:"Announced arrival for Majed Jaber",event_ar:"إعلان وصول لماجد جابر",type:"info"},
       {time:"12:32 PM",actor:"System",event_en:"First-login request from Fadi Yousef",event_ar:"طلب أول دخول من فادي يوسف",type:"pending"}
     ],
     notifications:[
@@ -204,9 +348,22 @@
     ]
   };
 
-  const KEY="safedismiss_state_v4";
+  const KEY="safedismiss_state_v5";
   function load(){
-    try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.students){if(!s.notifications)s.notifications=[];if(!s.gradeBands)s.gradeBands=JSON.parse(JSON.stringify(DEFAULT_STATE.gradeBands));return s;}}catch(e){}
+    try{
+      const s=JSON.parse(localStorage.getItem(KEY));
+      if(s&&s.students){
+        if(!s.notifications)s.notifications=[];
+        if(!s.gradeBands)s.gradeBands=JSON.parse(JSON.stringify(DEFAULT_STATE.gradeBands));
+        if(!s.branches)s.branches=JSON.parse(JSON.stringify(DEFAULT_STATE.branches));
+        if(!s.admins)s.admins=JSON.parse(JSON.stringify(DEFAULT_STATE.admins));
+        if(!s.classes)s.classes=JSON.parse(JSON.stringify(DEFAULT_STATE.classes));
+        s.branches.forEach(b=>{if(typeof b.classesEnabled==="undefined")b.classesEnabled=false;});
+        const def=s.branches[0]?s.branches[0].id:"main";
+        s.students.forEach(st=>{if(!st.branchId)st.branchId=def;if(typeof st.classId==="undefined")st.classId="";});
+        return s;
+      }
+    }catch(e){}
     return JSON.parse(JSON.stringify(DEFAULT_STATE));
   }
   function save(s){localStorage.setItem(KEY,JSON.stringify(s));}
@@ -258,6 +415,19 @@
   }
   function setLang(lang){STATE.lang=lang;save(STATE);applyI18n();}
 
+  /* ---------------- theme (light / dark) ---------------- */
+  function curTheme(){return STATE.theme||"light";}
+  function applyTheme(){
+    const dark=curTheme()==="dark";
+    document.body.classList.toggle("theme-dark",dark);
+    document.querySelectorAll("[data-theme-toggle]").forEach(b=>{
+      b.textContent=dark?"☀️":"🌙";
+      b.setAttribute("aria-label",dark?"Switch to light mode":"Switch to dark mode");
+    });
+  }
+  function setTheme(theme){STATE.theme=theme;save(STATE);applyTheme();}
+  function toggleTheme(){setTheme(curTheme()==="dark"?"light":"dark");}
+
   /* ---------------- UI helpers ---------------- */
   function toast(msg,type){
     let wrap=document.querySelector(".toast-wrap");
@@ -283,6 +453,61 @@
     return bands.find(b=>b.id===id)||bands[bands.length-1]||{id:"upper",name_en:"Grades 4–6",name_ar:"الصفوف ٤–٦",dismissal:"14:30"};
   }
   function bandName(band){return curLang()==="ar"?band.name_ar:band.name_en;}
+
+  /* ---- branches & admins ---- */
+  function branches(){return STATE.branches||[];}
+  function branchById(id){return branches().find(b=>b.id===id)||branches()[0]||null;}
+  function branchName(b){if(!b)return "";if(typeof b==="string")b=branchById(b);return b?(curLang()==="ar"?b.name_ar:b.name_en):"";}
+  function branchPhone(b){if(typeof b==="string")b=branchById(b);return b?b.phone:"";}
+  function admins(){return STATE.admins||[];}
+  function adminsForBranch(branchId){return admins().filter(a=>a.branchId===branchId);}
+  function adminName(a){return curLang()==="ar"?a.name_ar:a.name_en;}
+  function addBranch(name,phone){
+    const id="br"+Date.now().toString(36);
+    STATE.branches.push({id,name_en:name,name_ar:name,phone:phone});
+    save(STATE);return id;
+  }
+  function addAdmin(name,phone,branchId){
+    const id="A-"+Date.now().toString(36);
+    STATE.admins.push({id,name_en:name,name_ar:name,phone:phone,branchId:branchId});
+    save(STATE);return id;
+  }
+  function moveAdmin(adminId,branchId){
+    const a=admins().find(x=>x.id===adminId);if(a){a.branchId=branchId;save(STATE);}
+    return a;
+  }
+  function moveStudent(studentId,branchId){
+    const s=(STATE.students||[]).find(x=>x.id===studentId);if(s){s.branchId=branchId;save(STATE);}
+    return s;
+  }
+  function studentBranch(student){return branchById(student&&student.branchId);}
+
+  /* ---- classes & teacher feed (per-branch feature) ---- */
+  function classes(){return STATE.classes||[];}
+  function classById(id){return classes().find(c=>c.id===id)||null;}
+  function className(c){if(typeof c==="string")c=classById(c);return c?(curLang()==="ar"?c.name_ar:c.name_en):"";}
+  function classesForBranch(branchId){return classes().filter(c=>c.branchId===branchId);}
+  function branchClassesEnabled(branchId){const b=branchById(branchId);return !!(b&&b.classesEnabled);}
+  function setBranchClasses(branchId,on){const b=branchById(branchId);if(b){b.classesEnabled=!!on;save(STATE);}return b;}
+  function addClass(name,branchId){
+    const id="C-"+Date.now().toString(36);
+    STATE.classes.push({id,name_en:name,name_ar:name,branchId:branchId});
+    save(STATE);return id;
+  }
+  function setStudentClass(studentId,classId){
+    const s=(STATE.students||[]).find(x=>x.id===studentId);if(s){s.classId=classId;save(STATE);}return s;
+  }
+  /* Teacher feed for a class: announced arrivals (inqueue) + approved overrides today.
+     Only returns data when the student's branch has the classroom feature enabled. */
+  function classFeed(classId){
+    const today=dateStr();
+    return (STATE.students||[]).filter(s=>s.classId===classId&&branchClassesEnabled(s.branchId)).map(s=>{
+      const ov=(STATE.overrides||[]).find(o=>o.student===s.name_en&&o.status==="approved"&&(o.date===today||!o.date));
+      return {student:s,announced:s.status==="inqueue",overrideApproved:!!ov};
+    }).filter(x=>x.announced||x.overrideApproved);
+  }
+
+
   /* Arabic display names for people (parents). Falls back to the given name. */
   const PEOPLE_AR={
     "Tariq Jaber":"طارق جابر",
@@ -407,8 +632,11 @@
            '<div class="bell-panel hidden"><div class="bell-h"><span data-i18n="notif_center"></span><a href="#" data-bell-read data-i18n="mark_read"></a></div><div class="bell-list" data-bell-list></div></div>'+
          '</div>'+
          '<div class="lang-toggle"><button data-lang="en" aria-label="English">EN</button><button data-lang="ar" aria-label="Arabic">ع</button></div>'+
+         '<button class="theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme">🌙</button>'+
        '</div></div>';
       top.querySelectorAll(".lang-toggle button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+      const tt=top.querySelector("[data-theme-toggle]");
+      if(tt)tt.onclick=()=>toggleTheme();
       const bell=top.querySelector("[data-bell]"),panel=top.querySelector(".bell-panel");
       function togglePanel(){panel.classList.toggle("hidden");if(!panel.classList.contains("hidden")){STATE.notifications.forEach(n=>n.read=true);save(STATE);renderBell();}}
       bell.addEventListener("click",e=>{if(e.target.closest("[data-bell-read]"))return;togglePanel();});
@@ -419,12 +647,13 @@
     const foot=document.querySelector("[data-chrome='foot']");
     if(foot){
       foot.innerHTML='<div class="proto-nav"><div class="container">'+
-        '<a href="index.html">🏠 Home</a>'+
-        '<a href="moderator.html">Moderator</a>'+
-        '<a href="admin.html">Admin</a>'+
-        '<a href="parent.html">Parent</a>'+
-        '<a href="security.html">Security</a>'+
-        '<a href="dashboard.html">Dashboard</a>'+
+        '<a href="index.html">🏠 <span data-i18n="nav_home"></span></a>'+
+        '<a href="moderator.html" data-i18n="nav_moderator"></a>'+
+        '<a href="admin.html" data-i18n="nav_admin"></a>'+
+        '<a href="parent.html" data-i18n="nav_parent"></a>'+
+        '<a href="security.html" data-i18n="nav_security"></a>'+
+        '<a href="teacher.html" data-i18n="nav_teacher"></a>'+
+        '<a href="dashboard.html" data-i18n="nav_dashboard"></a>'+
         '<a href="#" data-reset-demo style="color:var(--alert)">↻ <span data-i18n="reset_demo"></span></a>'+
         '</div></div>';
       const rb=foot.querySelector("[data-reset-demo]");
@@ -434,7 +663,7 @@
   }
   /* cross-tab live sync */
   window.addEventListener("storage",e=>{
-    if(e.key===KEY){STATE=load();applyI18n();renderBell();document.dispatchEvent(new CustomEvent("sdsync"));}
+    if(e.key===KEY){STATE=load();applyTheme();applyI18n();renderBell();document.dispatchEvent(new CustomEvent("sdsync"));}
   });
 
   function statusBadge(status){
@@ -450,8 +679,12 @@
   /* ---------------- expose API ---------------- */
   window.SD={
     t,setLang,curLang,applyI18n,toast,modal,qrSvg,buildChrome,statusBadge,notify,nowTime,renderBell,
+    setTheme,toggleTheme,curTheme,applyTheme,
     dateStr,dayToken,pickupInfo,
     gradeBands,bandForGrade,bandName,overrideInfoFor,timeToDate,fmtTime,
+    branches,branchById,branchName,branchPhone,admins,adminsForBranch,adminName,
+    addBranch,addAdmin,moveAdmin,moveStudent,studentBranch,
+    classes,classById,className,classesForBranch,branchClassesEnabled,setBranchClasses,addClass,setStudentClass,classFeed,
     personName,localizeStudentName,
     state:()=>STATE,
     save:()=>save(STATE),
@@ -463,6 +696,7 @@
   document.addEventListener("DOMContentLoaded",()=>{
     const role=document.body.getAttribute("data-role")||"";
     buildChrome(role);
+    applyTheme();
     applyI18n();
   });
 })();

@@ -79,8 +79,8 @@
       event_en:"Released "+s.name_en+" (QR verified)",event_ar:"تم تسليم "+s.name_ar+" (تم التحقق من QR)",type:"released"});
     SD.save();
     document.getElementById("log").textContent="✅ "+SD.studentName(s)+" — "+SD.t("released_saved")+" "+now();
-    SD.notify(SD.studentName(s)+" released at Gate 2 — admin & parent notified",
-      "تم تسليم "+s.name_ar+" عند البوابة 2 — تم إخطار الإدارة وولي الأمر","success");
+    SD.notify(SD.studentName(s)+" released at Gate 2 — admin & guardian/parent notified",
+      "تم تسليم "+s.name_ar+" عند البوابة 2 — تم إخطار الإدارة وولي الأمر1","success");
     scanned=null;
     setTimeout(renderQueue,1000);
   }

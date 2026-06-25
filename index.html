@@ -3,50 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SafeDismiss — Prototype</title>
+<title>SafeDismiss — Safe, fast & verified school dismissal</title>
+<meta name="description" content="SafeDismiss links schools, guardians/parents and security in one verified flow — from arrival to release, every hand-over is logged, confirmed and child-safe.">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-role="">
 <div class="app-shell">
 <div data-chrome="top"></div>
 
-<header class="section" style="background:linear-gradient(160deg,#0f2c4d,#15396a);color:#fff">
-  <div class="container center">
-    <div style="font-size:46px">🛡️</div>
-    <h1 style="font-size:34px;margin:8px 0 6px" data-i18n="app_name"></h1>
-    <p style="opacity:.85;font-size:18px;margin:0" data-i18n="tagline"></p>
-    <p style="opacity:.7;margin-top:10px" data-i18n="choose_role"></p>
-  </div>
-</header>
+<main id="main" class="container">
 
-<main id="main" class="container section">
-  <div class="grid grid-3">
-    <a class="role-card" href="login.html?role=moderator">
-      <div class="ic" style="background:var(--navy-50);color:var(--navy)">🏫</div>
-      <h3 style="margin:0 0 4px" data-i18n="role_moderator"></h3>
-      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_moderator_d"></p>
-    </a>
-    <a class="role-card" href="login.html?role=admin">
-      <div class="ic" style="background:var(--navy-50);color:var(--navy)">🗂️</div>
-      <h3 style="margin:0 0 4px" data-i18n="role_admin"></h3>
-      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_admin_d"></p>
-    </a>
-    <a class="role-card" href="login.html?role=parent">
-      <div class="ic" style="background:var(--emerald-50);color:var(--emerald-600)">👪</div>
-      <h3 style="margin:0 0 4px" data-i18n="role_parent"></h3>
-      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_parent_d"></p>
-    </a>
-    <a class="role-card" href="login.html?role=security">
-      <div class="ic" style="background:var(--emerald-50);color:var(--emerald-600)">🛂</div>
-      <h3 style="margin:0 0 4px" data-i18n="role_security"></h3>
-      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_security_d"></p>
-    </a>
-    <a class="role-card" href="dashboard.html">
-      <div class="ic" style="background:#fdf6e3;color:var(--amber)">📊</div>
-      <h3 style="margin:0 0 4px" data-i18n="role_dashboard"></h3>
-      <p class="muted" style="margin:0;font-size:14px" data-i18n="role_dashboard_d"></p>
-    </a>
-  </div>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="hero-badge"><span class="hero-pulse"></span><span data-i18n="land_badge"></span></span>
+        <h1>
+          <span data-i18n="land_title"></span>
+          <span class="grad-text" data-i18n="land_title_hl"></span>
+        </h1>
+        <p class="lead" data-i18n="land_sub"></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#roles" data-i18n="land_cta_primary"></a>
+          <a class="btn btn-ghost btn-lg" href="#how" data-i18n="land_cta_secondary"></a>
+        </div>
+      </div>
+
+      <!-- Glassy preview card -->
+      <div class="preview" aria-hidden="true">
+        <div class="pv-h">
+          <div class="pv-dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+          <span class="pv-meta" data-i18n="pv_title"></span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-av">🧒</span>
+          <div>
+            <div class="pv-name">Majed Jaber</div>
+            <div class="pv-meta" data-i18n="pv_gate"></div>
+          </div>
+          <span class="pv-pill" data-i18n="pv_released"></span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-av">👧</span>
+          <div>
+            <div class="pv-name">Lana Yousef</div>
+            <div class="pv-meta" data-i18n="pv_arriving"></div>
+          </div>
+          <span class="pv-pill amber" data-i18n="pv_inqueue"></span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-av">🛡️</span>
+          <div>
+            <div class="pv-name">SafeDismiss</div>
+            <div class="pv-meta" data-i18n="pv_now"></div>
+          </div>
+          <span class="pv-pill" data-i18n="pv_released"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stat strip -->
+  <section class="section">
+    <div class="stat-strip">
+      <div class="card pad center stat"><span class="num" data-i18n="stat_schools_n"></span><span class="lbl" data-i18n="stat_schools_l"></span></div>
+      <div class="card pad center stat"><span class="num" data-i18n="stat_time_n"></span><span class="lbl" data-i18n="stat_time_l"></span></div>
+      <div class="card pad center stat"><span class="num" data-i18n="stat_safe_n"></span><span class="lbl" data-i18n="stat_safe_l"></span></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="feat_eyebrow"></div>
+      <h2 data-i18n="feat_head"></h2>
+      <p data-i18n="feat_sub"></p>
+    </div>
+    <div class="grid grid-4">
+      <div class="feature">
+        <div class="ic">🔐</div>
+        <h3 data-i18n="feat1_t"></h3>
+        <p data-i18n="feat1_d"></p>
+      </div>
+      <div class="feature">
+        <div class="ic">⏱️</div>
+        <h3 data-i18n="feat2_t"></h3>
+        <p data-i18n="feat2_d"></p>
+      </div>
+      <div class="feature">
+        <div class="ic">📱</div>
+        <h3 data-i18n="feat3_t"></h3>
+        <p data-i18n="feat3_d"></p>
+      </div>
+      <div class="feature">
+        <div class="ic">🗂️</div>
+        <h3 data-i18n="feat4_t"></h3>
+        <p data-i18n="feat4_d"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section" id="how">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="how_eyebrow"></div>
+      <h2 data-i18n="how_head"></h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="step">
+        <div class="n">1</div>
+        <h3 data-i18n="how1_t"></h3>
+        <p data-i18n="how1_d"></p>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <h3 data-i18n="how2_t"></h3>
+        <p data-i18n="how2_d"></p>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <h3 data-i18n="how3_t"></h3>
+        <p data-i18n="how3_d"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roles -->
+  <section class="section" id="roles">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="roles_eyebrow"></div>
+      <h2 data-i18n="choose_role"></h2>
+    </div>
+    <div class="grid grid-3">
+      <a class="role-card" href="login.html?role=moderator">
+        <div class="ic" style="background:var(--navy-50);color:var(--primary-700)">🏫</div>
+        <h3 style="margin:0 0 4px" data-i18n="role_moderator"></h3>
+        <p class="muted" style="margin:0;font-size:14px" data-i18n="role_moderator_d"></p>
+      </a>
+      <a class="role-card" href="login.html?role=admin">
+        <div class="ic" style="background:var(--navy-50);color:var(--primary-700)">🗂️</div>
+        <h3 style="margin:0 0 4px" data-i18n="role_admin"></h3>
+        <p class="muted" style="margin:0;font-size:14px" data-i18n="role_admin_d"></p>
+      </a>
+      <a class="role-card" href="login.html?role=parent">
+        <div class="ic" style="background:var(--emerald-50);color:var(--emerald-600)">👪</div>
+        <h3 style="margin:0 0 4px" data-i18n="role_parent"></h3>
+        <p class="muted" style="margin:0;font-size:14px" data-i18n="role_parent_d"></p>
+      </a>
+      <a class="role-card" href="login.html?role=security">
+        <div class="ic" style="background:var(--emerald-50);color:var(--emerald-600)">🛂</div>
+        <h3 style="margin:0 0 4px" data-i18n="role_security"></h3>
+        <p class="muted" style="margin:0;font-size:14px" data-i18n="role_security_d"></p>
+      </a>
+      <a class="role-card" href="login.html?role=teacher">
+        <div class="ic" style="background:var(--navy-50);color:var(--primary-700)">🍎</div>
+        <h3 style="margin:0 0 4px" data-i18n="role_teacher"></h3>
+        <p class="muted" style="margin:0;font-size:14px" data-i18n="role_teacher_d"></p>
+      </a>
+      <a class="role-card" href="dashboard.html">
+        <div class="ic" style="background:rgba(245,158,11,.14);color:var(--amber)">📊</div>
+        <h3 style="margin:0 0 4px" data-i18n="role_dashboard"></h3>
+        <p class="muted" style="margin:0;font-size:14px" data-i18n="role_dashboard_d"></p>
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <section class="section">
+    <div class="cta-band">
+      <h2 data-i18n="cta_title"></h2>
+      <p data-i18n="cta_sub"></p>
+      <a class="btn btn-primary btn-lg" href="#roles" data-i18n="cta_button"></a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-foot center">
+    <div class="brand" style="justify-content:center"><span class="logo">🛡️</span><span data-i18n="app_name"></span></div>
+    <div data-i18n="tagline"></div>
+    <div style="margin-top:6px" data-i18n="foot_rights"></div>
+  </footer>
+
 </main>
 
 <div data-chrome="foot"></div>
