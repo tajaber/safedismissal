@@ -309,6 +309,8 @@
     classroom_display:{en:"Classroom display",ar:"عرض الصف"},
     feature_on:{en:"Enabled",ar:"مفعّل"},
     feature_off:{en:"Disabled",ar:"معطّل"},
+    feature_enable:{en:"Enable",ar:"تفعيل"},
+    feature_disable:{en:"Disable",ar:"تعطيل"},
     add_class:{en:"Add class",ar:"إضافة فصل"},
     class_name:{en:"Class name",ar:"اسم الفصل"},
     class_label:{en:"Class",ar:"الفصل"},

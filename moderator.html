@@ -472,7 +472,7 @@
       row.innerHTML="<div style='flex:1'><strong>"+SD.branchName(b)+"</strong>"+
         "<div class='muted' style='font-size:12px'>"+SD.t("classroom_display")+" · "+SD.classesForBranch(b.id).length+" "+SD.t("tab_classes")+"</div></div>"+
         "<span class='badge "+(on?"badge-green":"badge-red")+"'>"+(on?SD.t("feature_on"):SD.t("feature_off"))+"</span>";
-      const btn=document.createElement("button");btn.className="btn "+(on?"btn-ghost":"btn-success");btn.textContent=on?SD.t("feature_off"):SD.t("feature_on");
+      const btn=document.createElement("button");btn.className="btn "+(on?"btn-ghost":"btn-success");btn.textContent=on?SD.t("feature_disable"):SD.t("feature_enable");
       btn.onclick=()=>{SD.setBranchClasses(b.id,!on);
         SD.state().audit.unshift({time:SD.nowTime(),actor:"Moderator · Admin",event_en:"Classroom display "+(!on?"enabled":"disabled")+" for "+b.name_en,event_ar:"عرض الصف "+(!on?"مفعّل":"معطّل")+" لـ "+b.name_en,type:"info"});SD.save();
         renderBranchFeatures();renderClassStudents();SD.toast(SD.branchName(b)+" · "+(!on?SD.t("feature_on"):SD.t("feature_off")),!on?"success":"warn");};
