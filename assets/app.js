@@ -119,7 +119,7 @@
     security_toggle_d:{en:"When ON, a security officer must scan & confirm before any release.",ar:"عند التفعيل، يجب أن يقوم ضابط الأمن بالمسح والتأكيد قبل أي تسليم."},
     required:{en:"Required",ar:"مطلوب"},
     not_required:{en:"Not Required",ar:"غير مطلوب"},
-    invite_partner:{en:"Invite Guardian/Parent & Guardian/Parent2",ar:"دعوة ولي أمر وولي الأمر2"},
+    invite_partner:{en:"Invite Guardian/Parent & Guardian/Parent2",ar:"دعوة ولي أمر"},
     parent_phone:{en:"Guardian/Parent phone",ar:"هاتف ولي أمر"},
     parent_email:{en:"Guardian/Parent email (optional)",ar:"بريد ولي أمر (اختياري)"},
     coparent_phone:{en:"Guardian/Parent2 phone",ar:"هاتف ولي الأمر2"},
@@ -425,16 +425,22 @@
      (so the "window closed → phone the school" case still shows) and the older bands
      open (so a parent can actually request an override). */
   function reseedDismissalTimes(){
-    // Compress the open windows so the older bands never wrap past midnight (which would
-    // break ordering late in the evening). Youngest band stays just past its cutoff (closed).
+    // Keep the youngest band just past its cutoff (closed) and the older bands OPEN.
+    // "Open" means dismissal - overrideDeadlineMin > now, so we target offsets above the
+    // deadline; near midnight we push the open bands as late as ~23:58 (without wrapping).
     const now=Date.now();
-    const end=new Date();end.setHours(23,50,0,0);
-    const room=Math.max(10,(end.getTime()-now)/60000); // minutes left before ~midnight
-    const offsets={kg:-20,lower:Math.min(90,room*0.5),upper:Math.min(150,room*0.85)};
+    const mins=STATE.overrideDeadlineMin||30;
+    const d2355=new Date();d2355.setHours(23,55,0,0);
+    const maxOff=Math.max(0,(d2355.getTime()-now)/60000); // minutes until 23:55 (no midnight wrap)
+    const offsets={
+      kg:-20,
+      lower:Math.min(mins+25,maxOff-5),
+      upper:Math.min(mins+60,maxOff)
+    };
     (STATE.gradeBands||[]).forEach((b,i)=>{
-      const off=(b.id in offsets)?offsets[b.id]:Math.min(60+i*60,room*0.85);
+      const off=(b.id in offsets)?offsets[b.id]:Math.min(mins+60,maxOff);
       const d=new Date(now+off*60000);
-      d.setMinutes(Math.round(d.getMinutes()/5)*5,0,0);
+      d.setMinutes(Math.floor(d.getMinutes()/5)*5,0,0);
       b.dismissal=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
     });
   }
