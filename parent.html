@@ -88,6 +88,7 @@
     kids.forEach(s=>{
       const c=document.createElement("div");c.className="card pad";c.style.marginBottom="14px";
       const canAnnounce=arrivalEnabled(s);
+      const isCar=s.method==="car";
       // bus1a without an approved override hides the Announce button entirely (per policy).
       const announceHidden=(s.method==="bus1a"||s.method==="bus1m"||s.method==="bus2")&&!canAnnounce;
       // Each kid's override window is computed from ITS OWN grade band's dismissal time.
@@ -95,9 +96,10 @@
       const br=SD.studentBranch(s);
       const bandLine="<span class='badge badge-navy' style='margin-top:6px'>"+SD.bandName(od.band)+" · "+SD.t("dismissal_time")+" "+SD.fmtTime(od.band.dismissal)+"</span>";
       const branchLine=br?"<span class='badge badge-green' style='margin-top:6px;margin-inline-start:6px'>📍 "+SD.branchName(br)+"</span>":"";
-      const ovLine=od.open
+      // Car kids never need an override, so the override window line is hidden for them.
+      const ovLine=isCar?"":(od.open
         ? "<div class='muted' style='font-size:12px;margin:8px 0 0'>⏳ "+SD.t("override_closes")+" "+fmtLeft(od.msLeft)+" ("+SD.t("cutoff_label")+" "+SD.fmtTime(od.deadline.toTimeString().slice(0,5))+")</div>"
-        : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked").replace("0791234567",(br?br.phone:"0791234567"))+"</div>";
+        : "<div class='badge badge-red' style='margin-top:8px'>"+SD.t("override_blocked").replace("0791234567",(br?br.phone:"0791234567"))+"</div>");
       c.innerHTML=
         "<div style='display:flex;align-items:center;gap:10px'>"+
           "<div style='width:42px;height:42px;border-radius:12px;background:var(--navy-50);display:grid;place-items:center;font-size:20px'>🎒</div>"+
@@ -113,7 +115,8 @@
           (announceHidden?"":"<button class='btn "+(canAnnounce?"btn-success btn-glow":"btn-ghost")+"' data-announce='"+s.id+"' "+(canAnnounce?"":"disabled")+" style='flex:1'>"+SD.t("announce_arrival")+"</button>")+
         "</div>"+
         "<div style='display:flex;gap:8px;margin-top:8px;flex-wrap:wrap'>"+
-          "<button class='btn btn-ghost' data-override='"+s.id+"' "+(od.open?"":"disabled")+" style='flex:1'>"+SD.t("request_override")+"</button>"+
+          // Car pickup needs no override request — hide that button; keep Show QR.
+          (isCar?"":"<button class='btn btn-ghost' data-override='"+s.id+"' "+(od.open?"":"disabled")+" style='flex:1'>"+SD.t("request_override")+"</button>")+
           "<button class='btn btn-ghost' data-qr='"+s.id+"' style='flex:1'>"+SD.t("show_qr")+"</button>"+
         "</div>"+
         ovLine+

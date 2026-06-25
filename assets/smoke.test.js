@@ -411,6 +411,24 @@ console.log("TEST: parent bus1a announce gating");
   ok(!!w.document.querySelector("[data-announce='"+saad.id+"']"),"bus1a kid shows announce once an override is approved");
 }
 
+console.log("TEST: parent car-pickup hides Request Override, keeps Announce + Show QR");
+{
+  const w=loadPage("parent.html");
+  const st=w.SD.state();
+  // Bisan Jaber (Tariq) is a car kid
+  const bisan=st.students.find(s=>s.name_en==="Bisan Jaber");
+  ok(bisan&&bisan.method==="car","Bisan Jaber is a car-pickup kid");
+  w.document.getElementById("agree").checked=true;
+  w.document.getElementById("agree").dispatchEvent(new w.Event("change"));
+  w.document.getElementById("enter").click();
+  ok(!w.document.querySelector("[data-override='"+bisan.id+"']"),"car kid has NO Request Override button");
+  ok(!!w.document.querySelector("[data-announce='"+bisan.id+"']"),"car kid shows Announce Arrival");
+  ok(!!w.document.querySelector("[data-qr='"+bisan.id+"']"),"car kid shows Show QR");
+  // a non-car kid (Razan, bus2) still exposes the override button
+  const razan=st.students.find(s=>s.name_en==="Razan Jaber");
+  ok(!!w.document.querySelector("[data-override='"+razan.id+"']"),"non-car kid still shows Request Override");
+}
+
 console.log("TEST: classes feature (per-branch toggle, add class, link student)");
 {
   const w=loadPage("moderator.html");
