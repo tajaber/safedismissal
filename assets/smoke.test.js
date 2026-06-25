@@ -492,6 +492,9 @@ console.log("TEST: parent card shows the branch call-center phone on the last li
   ok(card&&card.textContent.indexOf(w.SD.t("call_center_label"))>-1,"kid card shows a call-center line");
   const kid=w.SD.state().students.find(s=>s.parent==="Tariq Jaber");
   ok(card&&card.textContent.indexOf(w.SD.branchCallCenter(kid.branchId))>-1,"call-center line shows the branch's configured number");
+  // dismissal method is read-only (label, not a dropdown)
+  ok(!w.document.querySelector("#kids select[data-k]"),"parent app has NO dismissal-method dropdown");
+  ok(card&&card.textContent.indexOf(w.SD.t(kid.method))>-1,"dismissal method is shown as a read-only label");
 }
 
 console.log("TEST: moderator manages security personnel + branch call center");

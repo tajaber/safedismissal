@@ -126,9 +126,8 @@
         "</div>"+
         "<div style='margin-top:8px'>"+bandLine+branchLine+"</div>"+
         "<div class='field' style='margin-top:12px'><label>"+SD.t("method")+"</label>"+
-          "<select data-k='"+s.id+"'>"+
-            opt("bus2",s.method)+opt("bus1m",s.method)+opt("bus1a",s.method)+opt("car",s.method)+
-          "</select></div>"+
+          "<div class='input' style='display:flex;align-items:center;background:var(--navy-50);font-weight:600' aria-readonly='true'>"+SD.t(s.method)+"</div>"+
+        "</div>"+
         "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+
           (announceHidden?"":"<button class='btn "+(canAnnounce?"btn-success btn-glow":"btn-ghost")+"' data-announce='"+s.id+"' "+(canAnnounce?"":"disabled")+" style='flex:1'>"+SD.t("announce_arrival")+"</button>")+
         "</div>"+
@@ -143,12 +142,7 @@
     });
     bind();
   }
-  function opt(v,cur){return "<option value='"+v+"' "+(cur===v?"selected":"")+">"+SD.t(v)+"</option>";}
-
   function bind(){
-    document.querySelectorAll("select[data-k]").forEach(sel=>{
-      sel.onchange=()=>{const s=SD.state().students.find(x=>x.id===sel.dataset.k);s.method=sel.value;SD.save();render();};
-    });
     document.querySelectorAll("[data-announce]").forEach(btn=>{
       btn.onclick=()=>{
         const id=btn.dataset.announce;const s=SD.state().students.find(x=>x.id===id);
