@@ -21,7 +21,7 @@ user flows for every role.
 - Bilingual EN/AR with full RTL, simulated MFA, role-based flows.
 - Grade-based dismissal time frames (e.g. KG leaves earlier) with per-kid override cutoffs.
 - Dynamic, day-scoped pickup QR codes.
-- Notification center with cross-tab live sync.
+- Notification center with cross-tab live sync; transient alerts appear as native-style banners at the top of the screen (iOS/Android look).
 
 ## Running the tests (optional, for development)
 The interactive site needs no dependencies. To run the included checks:

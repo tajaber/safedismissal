@@ -495,9 +495,11 @@
     const el=document.createElement("div");
     el.className="toast "+(type||"");
     el.setAttribute("role","status");
-    el.innerHTML="<strong>"+t("notif")+"</strong><br>"+msg;
+    el.innerHTML='<span class="toast-ic" aria-hidden="true">🛡️</span>'+
+      '<div class="toast-body"><strong>'+t("app_name")+'</strong>'+
+      '<span class="toast-msg">'+msg+'</span></div>';
     wrap.appendChild(el);
-    setTimeout(()=>{el.style.opacity="0";el.style.transition="opacity .3s";setTimeout(()=>el.remove(),300);},4200);
+    setTimeout(()=>{el.style.opacity="0";el.style.transform="translateY(-12px)";el.style.transition="opacity .3s, transform .3s";setTimeout(()=>el.remove(),300);},4200);
   }
   function nowTime(){return new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});}
   function dateStr(d){return (d||new Date()).toISOString().slice(0,10);}
