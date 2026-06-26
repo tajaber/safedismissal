@@ -53,8 +53,17 @@
 <script>
 (function(){
   let scanned=null;
+  let lastScannedId=null;
 
   function queue(){return SD.state().students.filter(s=>s.status==="inqueue");}
+
+  // The security officer on duty for this student's branch (moderator-managed roster).
+  function officerFor(s){
+    const list=SD.securityForBranch(s.branchId)||[];
+    return list.length?SD.securityName(list[0]):"Officer Faisal";
+  }
+  // Date + time stamp for the release record (shown back on a duplicate scan).
+  function stamp(){return new Date().toLocaleString(SD.curLang()==="ar"?"ar":"en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});}
 
   function renderQueue(){
     const b=document.getElementById("queueBody");b.innerHTML="";
@@ -62,18 +71,19 @@
     if(!q.length){b.innerHTML="<tr><td colspan='3' class='muted center' style='padding:24px'>"+(SD.curLang()==="ar"?"لا أحد في الطابور":"Queue is empty")+"</td></tr>";}
     q.forEach(s=>{
       const tr=document.createElement("tr");tr.dataset.id=s.id;
-      const enabled=scanned===s.id;
+      const isScanned=scanned===s.id;
+      const action=isScanned
+        ? "<span class='badge badge-green'>"+SD.t("scanned_confirm_above")+"</span>"
+        : "<span class='muted' style='font-size:12px'>"+SD.t("await_scan")+"</span>";
       tr.innerHTML="<td data-label='"+SD.t("student")+"'><strong>"+SD.studentName(s)+"</strong><div class='muted' style='font-size:12px'>"+s.grade+"</div></td>"+
         "<td data-label='"+SD.t("parent")+"'>"+SD.personName(s.parent)+"</td>"+
-        "<td data-label='"+SD.t("actions")+"'><button class='btn "+(enabled?"btn-success btn-glow":"btn-ghost")+"' "+(enabled?"":"disabled")+" data-rel='"+s.id+"'>"+SD.t("confirm_release")+"</button></td>";
-      const rb=tr.querySelector("[data-rel]");
-      if(rb&&enabled)rb.onclick=()=>openGateModal(s,tr);
+        "<td data-label='"+SD.t("actions")+"'>"+action+"</td>";
       b.appendChild(tr);
     });
   }
 
   // Gate selection is a modal of clickable gate buttons for the child's branch.
-  function openGateModal(s,tr){
+  function openGateModal(s){
     const gates=SD.branchGates(s.branchId);
     const br=SD.studentBranch(s);
     const btns=gates.map(g=>"<button class='btn btn-primary btn-lg' data-gate='"+g.replace(/'/g,"&#39;")+"' style='width:100%;margin-bottom:10px'>🚪 "+g+"</button>").join("");
@@ -82,22 +92,69 @@
            "<p style='margin:0 0 12px'><strong>"+SD.studentName(s)+"</strong> · "+s.id+(br?(" · 📍 "+SD.branchName(br)):"")+"</p>"+btns,
       buttons:[{label:SD.t("cancel"),class:"btn-ghost"}]});
     bg.querySelectorAll("[data-gate]").forEach(btn=>{
-      btn.onclick=()=>{const gate=btn.getAttribute("data-gate");bg.remove();release(s,tr,gate);};
+      btn.onclick=()=>{const gate=btn.getAttribute("data-gate");bg.remove();release(s,gate);};
     });
   }
 
-  function release(s,tr,gate){
+  function release(s,gate){
     if(!gate)return;
-    tr.classList.add("row-flash");
+    // Capture the QR reference BEFORE releasing (an inqueue/arrival ref is lost once released).
+    const info=SD.pickupInfo(s);
+    const officer=officerFor(s);
+    const at=stamp();
     s.status="released";
-    SD.state().audit.unshift({time:now(),actor:"Security · "+gate,
+    s.release={by:officer,at:at,gate:gate,ref:info.eligible?info.ref:"—",token:info.eligible?info.token:""};
+    SD.state().audit.unshift({time:now(),actor:"Security · "+officer+" · "+gate,
       event_en:"Released "+s.name_en+" (QR verified) at "+gate,event_ar:"تم تسليم "+s.name_ar+" (تم التحقق من QR) عند "+gate,type:"released"});
     SD.save();
     document.getElementById("log").textContent="✅ "+SD.studentName(s)+" — "+SD.t("released_saved")+" ("+SD.t("released_at_gate")+" "+gate+") "+now();
     SD.notify(SD.studentName(s)+" released at "+gate+" — admin & guardian/parent notified",
       "تم تسليم "+s.name_ar+" عند "+gate+" — تم إخطار الإدارة وولي الأمر1","success");
     scanned=null;
-    setTimeout(renderQueue,1000);
+    // Keep lastScannedId so re-scanning this same QR shows the "already released" notice.
+    // Update the scan card in place to a released-confirmation state.
+    const res=document.getElementById("scanResult");
+    res.classList.remove("hidden");
+    res.innerHTML="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br>"+SD.statusBadge("released")+
+      "<div class='badge badge-green' style='margin-top:8px'>✅ "+SD.t("released_saved")+"</div>"+
+      "<div class='muted' style='font-size:13px;margin-top:6px'>"+SD.t("released_at_gate")+" <strong>"+gate+"</strong> · "+at+"</div>";
+    renderQueue();
+  }
+
+  // Single place that paints the post-scan card: confirm-release, already-released, or not-eligible.
+  function showScanCard(s){
+    const res=document.getElementById("scanResult");
+    res.classList.remove("hidden");
+    lastScannedId=s.id;
+    const header="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br><span class='muted'>"+SD.t("parent")+": "+SD.personName(s.parent)+"</span><br>";
+    // Duplicate scan: this QR was already used to release the student earlier today.
+    if(s.status==="released"&&s.release){
+      res.innerHTML=header+SD.statusBadge("released")+
+        "<div class='badge badge-red' style='margin-top:8px'>⚠️ "+SD.t("already_released")+"</div>"+
+        "<div class='muted' style='font-size:13px;margin-top:6px'>"+SD.t("released_by")+" <strong>"+s.release.by+"</strong> "+SD.t("released_at_time")+" "+s.release.at+
+        (s.release.gate?(" · "+SD.t("released_at_gate")+" "+s.release.gate):"")+"</div>"+
+        "<div class='muted' style='font-size:12px'>"+SD.t("scan_ref")+": "+s.release.ref+(s.release.token?(" · Token "+s.release.token):"")+"</div>"+
+        "<div class='muted' style='font-size:12px;margin-top:6px'>"+SD.t("dup_scan_help")+"</div>";
+      scanned=null;lastScannedId=null;renderQueue();
+      SD.toast(SD.studentName(s)+" — "+SD.t("already_released"),"warn");
+      return;
+    }
+    const info=SD.pickupInfo(s);
+    if(!info.eligible){
+      res.innerHTML=header+SD.statusBadge("inqueue")+"<br><span class='badge badge-red'>"+SD.t("qr_need_override")+"</span>";
+      scanned=null;lastScannedId=null;renderQueue();
+      SD.toast("Pickup QR invalid for today — verify approval","danger");
+      return;
+    }
+    // Eligible & in queue: show the Confirm Release button INSIDE the scan card.
+    scanned=s.id;
+    res.innerHTML=header+SD.statusBadge("inqueue")+
+      "<br><span class='badge badge-green'>"+SD.t("scan_ref")+": "+info.ref+"</span>"+
+      "<br><span class='muted' style='font-size:12px'>"+SD.t("qr_valid_today")+" · Token "+info.token+"</span>"+
+      "<button class='btn btn-success btn-lg btn-block' style='margin-top:14px' data-confirm='"+s.id+"'>"+SD.t("confirm_release")+"</button>";
+    res.querySelector("[data-confirm]").onclick=()=>openGateModal(s);
+    renderQueue();
+    SD.toast("QR matched: "+SD.studentName(s)+" ("+info.ref+") — "+SD.t("confirm_release_hint"),"success");
   }
 
   document.getElementById("scanBtn").onclick=()=>{
@@ -105,20 +162,17 @@
     box.innerHTML="<div style='font-size:18px;font-weight:700;color:var(--navy)'>"+SD.t("scanning")+"</div>";
     document.getElementById("scanBtn").disabled=true;
     setTimeout(()=>{
-      const q=queue();
-      const s=q[0];
-      box.innerHTML="<div style='font-size:48px'>✅</div>";
       document.getElementById("scanBtn").disabled=false;
+      // Re-scanning the same QR right after a release re-presents that (now released) student.
+      let s=null;
+      if(lastScannedId){
+        const prev=SD.state().students.find(x=>x.id===lastScannedId);
+        if(prev&&prev.status==="released")s=prev;
+      }
+      if(!s)s=queue()[0];
       if(!s){box.innerHTML="<div style='font-size:48px'>📷</div>";SD.toast("Queue empty — nothing to scan","warn");return;}
-      scanned=s.id;
-      const info=SD.pickupInfo(s);
-      const res=document.getElementById("scanResult");
-      res.classList.remove("hidden");
-      const refTxt=info.eligible?("<br><span class='badge badge-green'>"+SD.t("scan_ref")+": "+info.ref+"</span><br><span class='muted' style='font-size:12px'>"+SD.t("qr_valid_today")+" · Token "+info.token+"</span>"):("<br><span class='badge badge-red'>"+SD.t("qr_need_override")+"</span>");
-      res.innerHTML="<strong>"+SD.studentName(s)+"</strong> · "+s.id+"<br><span class='muted'>"+SD.t("parent")+": "+SD.personName(s.parent)+"</span><br>"+SD.statusBadge("inqueue")+refTxt;
-      if(!info.eligible){scanned=null;SD.toast("Pickup QR invalid for today — verify approval","danger");renderQueue();return;}
-      renderQueue();
-      SD.toast("QR matched: "+SD.studentName(s)+" ("+info.ref+") — "+SD.t("confirm_release_hint"),"success");
+      box.innerHTML="<div style='font-size:48px'>✅</div>";
+      showScanCard(s);
     },1400);
   };
 
@@ -140,8 +194,7 @@
       "<button class='btn btn-success' style='margin-top:8px' data-vid='"+s.id+"'>"+SD.t("verify_identity")+"</button></div>";
     }).join("");
     r.querySelectorAll("[data-vid]").forEach(b=>{
-      b.onclick=()=>{const s=q.find(x=>x.id===b.dataset.vid);scanned=s.id;
-        renderQueue();SD.toast(SD.t("matched")+" · "+SD.studentName(s)+" — "+SD.t("confirm_release_hint"),"success");};
+      b.onclick=()=>{const s=q.find(x=>x.id===b.dataset.vid);showScanCard(s);};
     });
   };
 

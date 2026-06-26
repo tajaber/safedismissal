@@ -282,6 +282,12 @@
     gate_modal_help:{en:"Choose the gate where this child is being released:",ar:"اختر البوابة التي يتم تسليم الطفل عندها:"},
     confirm_release_hint:{en:"tap Confirm Release, then pick the gate",ar:"اضغط تأكيد التسليم، ثم اختر البوابة"},
     released_at_gate:{en:"Released at",ar:"تم التسليم عند"},
+    already_released:{en:"Already released",ar:"تم التسليم مسبقًا"},
+    released_by:{en:"Released by",ar:"تم التسليم بواسطة"},
+    released_at_time:{en:"at",ar:"في"},
+    dup_scan_help:{en:"This QR was already used for today's pickup. No second release is allowed.",ar:"استُخدم رمز QR هذا للاستلام اليوم. لا يُسمح بتسليم ثانٍ."},
+    await_scan:{en:"Awaiting scan",ar:"بانتظار المسح"},
+    scanned_confirm_above:{en:"Scanned — confirm above",ar:"تم المسح — أكّد بالأعلى"},
 
     /* guardian override button states */
     override_pending_btn:{en:"Pending override approval",ar:"بانتظار اعتماد الاستثناء"},
