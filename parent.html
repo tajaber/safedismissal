@@ -184,6 +184,7 @@
               SD.save();
               SD.notify("Car override for "+s.name_en+" sent to "+SD.branchName(br)+" — "+SD.t("notified_admins")+": "+adminNames,
                 "طلب استثناء بالسيارة لـ "+s.name_ar+" أُرسل إلى "+SD.branchName(br)+" — "+SD.t("notified_admins")+": "+adminNamesAr,"");
+              render();
             }}
           ]});
       };
